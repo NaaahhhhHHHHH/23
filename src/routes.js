@@ -1,5 +1,9 @@
 import React from 'react'
 
+const Employee = React.lazy(() => import('./views/pages/People/Employee'))
+const Owner = React.lazy(() => import('./views/pages/People/Owner'))
+const Customer = React.lazy(() => import('./views/pages/People/Customer'))
+
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
@@ -97,6 +101,9 @@ const routes = [
   { path: '/notifications/modals', name: 'Modals', element: Modals },
   { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
   { path: '/widgets', name: 'Widgets', element: Widgets },
+  { path: '/People/Employee', name: 'Employee', element: Employee },
+  { path: '/People/Owner', name: 'Owner', element: Owner },
+  { path: '/People/Customer', name: 'Customer', element: Customer },
 ]
 
 export default routes

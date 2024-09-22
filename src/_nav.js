@@ -12,6 +12,7 @@ import {
   cilPuzzle,
   cilSpeedometer,
   cilStar,
+  cilUser
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -284,6 +285,11 @@ const _nav = [
       },
       {
         component: CNavItem,
+        name: 'Employee',
+        to: '/employee',
+      },
+      {
+        component: CNavItem,
         name: 'Register',
         to: '/register',
       },
@@ -296,6 +302,28 @@ const _nav = [
         component: CNavItem,
         name: 'Error 500',
         to: '/500',
+      },
+    ],
+  },
+  {
+    component: CNavGroup,
+    name: 'People',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Employee',
+        to: '/People/Employee',
+      },
+      {
+        component: CNavItem,
+        name: 'Owner',
+        to: '/People/Owner',
+      },
+      {
+        component: CNavItem,
+        name: 'Customer',
+        to: '/People/Customer',
       },
     ],
   },

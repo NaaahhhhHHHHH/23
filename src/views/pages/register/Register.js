@@ -70,7 +70,7 @@ const Register = () => {
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
         <CRow className="justify-content-center">
-          <CCol md={9} lg={7} xl={6}>
+          <CCol md={6} lg={6} xl={6}>
             <CCard className="mx-4">
               <CCardBody className="p-4">
                 <CForm onSubmit={handleSubmit}>
@@ -137,23 +137,20 @@ const Register = () => {
                       placeholder="Repeat password"
                     />
                   </CInputGroup>
-                  <CInputGroup className="mb-4">
-                    <CInputGroupText>
-                      <CIcon icon={cilMedicalCross} />
-                    </CInputGroupText>
-                    <CFormInput
-                      type="password"
-                      onChange={(e) => setSsn(e.target.value)}
-                      required
-                      placeholder="Social Security Number"
-                      autoComplete="Social Security Number"
-                    />
-                  </CInputGroup>
-                  <div className="d-grid">
-                    <CButton type="submit" color="success">
+                  <CRow>
+                    <CCol xs={5}>
+                    <CButton type="submit" color="primary">
                       Create Account
                     </CButton>
-                  </div>
+                    </CCol>
+                    <CCol xs={6}>
+                    <Link to="/login">
+                    <CButton color="link" className="px-0">
+                      Already have account, Sign in
+                    </CButton>
+                    </Link>
+                    </CCol>
+                  </CRow>
                 </CForm>
               </CCardBody>
             </CCard>

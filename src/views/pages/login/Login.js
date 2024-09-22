@@ -1,7 +1,7 @@
 import React from 'react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { login } from '../../../api'
+import { login } from '../../../authApi'
 import { toast } from 'react-hot-toast'
 import {
   CButton,
@@ -26,7 +26,6 @@ const Login = () => {
   // State for form inputs
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState('customer') // Default role is 'customer'
   // const [errorMessage, setErrorMessage] = useState(null)
 
   // Handle role change
@@ -40,7 +39,7 @@ const Login = () => {
     //setErrorMessage(null) // Clear previous errors
     try {
       // Call the login API function from api.js
-      const data = await login(username, password, role).then((res) => {
+      const data = await login(username, password).then((res) => {
         localStorage.setItem('CRM-id', res.user.id)
         localStorage.setItem('CRM-name', res.user.name)
         localStorage.setItem('CRM-email', res.user.email)
@@ -65,7 +64,7 @@ const Login = () => {
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
         <CRow className="justify-content-center">
-          <CCol md={8}>
+          <CCol md={5}>
             <CCardGroup>
               <CCard className="p-4">
                 <CCardBody>
@@ -117,58 +116,6 @@ const Login = () => {
                   </CForm>
                 </CCardBody>
               </CCard>
-              <div
-                className="text-white bg-primary py-5"
-                style={{
-                  width: '35%',
-                  paddingLeft: '7%',
-                  paddingRight: '7%',
-                }}
-              >
-                <CCardBody className="text-center">
-                  <div>
-                    <br></br>
-                    <br></br>
-                    <p>Select your role:</p>
-                    <CFormCheck
-                      style={{
-                        borderColor: 'white',
-                      }}
-                      type="radio"
-                      name="role"
-                      id="owner"
-                      label="Owner"
-                      value="owner"
-                      checked={role === 'owner'}
-                      onChange={handleRoleChange}
-                    />
-                    <CFormCheck
-                      style={{
-                        borderColor: 'white',
-                      }}
-                      type="radio"
-                      name="role"
-                      id="employee"
-                      label="Employee"
-                      value="employee"
-                      checked={role === 'employee'}
-                      onChange={handleRoleChange}
-                    />
-                    <CFormCheck
-                      style={{
-                        borderColor: 'white',
-                      }}
-                      type="radio"
-                      name="role"
-                      id="customer"
-                      label="Customer"
-                      value="customer"
-                      checked={role === 'customer'}
-                      onChange={handleRoleChange}
-                    />
-                  </div>
-                </CCardBody>
-              </div>
             </CCardGroup>
           </CCol>
         </CRow>

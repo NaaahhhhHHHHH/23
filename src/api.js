@@ -1,34 +1,36 @@
-import axios from 'axios'
+// src/api.js
+import axios from 'axios';
 
-// Base URL configuration (optional, if your API URL is different from your frontend)
-const API_BASE_URL = 'http://localhost:5000'
-//process.env.REACT_APP_API_BASE_URL || '' // Use .env file to manage base URLs
+const BASE_URL = 'http://localhost:5000/api';
 
-// Function to handle login API request
-export const login = async (username, password, role) => {
-  try {
-    const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
-      username,
-      password,
-      role,
-    })
+const getAuthToken = () => {
+  return localStorage.getItem('CRM-token');
+};
 
-    // Return the response data (e.g., token, user info)
-    return response.data
-  } catch (error) {
-    // Forward error to the calling function (can be used for handling errors)
-    throw error.response ? error.response.data : { message: 'An error occurred' }
+const axiosInstance = axios.create({
+  baseURL: BASE_URL,
+});
+
+axiosInstance.interceptors.request.use((config) => {
+  const token = getAuthToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-}
+  return config;
+});
 
-// Function to handle login API request
-export const postAPI = async (requestData, path) => {
-  try {
-    const response = await axios.post(`${API_BASE_URL}${path}`, requestData)
-    // Return the response data (e.g., token, user info)
-    return response.data
-  } catch (error) {
-    // Forward error to the calling function (can be used for handling errors)
-    throw error.response ? error.response.data : { message: 'An error occurred' }
-  }
-}
+export const getData = async (typeData) => {
+  return await axiosInstance.get(`/${typeData}`);
+};
+
+export const createData = async (typeData, data) => {
+  return await axiosInstance.post(`/${typeData}`, data);
+};
+
+export const updateData = async (typeData, id, data) => {
+  return await axiosInstance.put(`/${typeData}/${id}`, data);
+};
+
+export const deleteData = async (typeData, id) => {
+  return await axiosInstance.delete(`/${typeData}/${id}`);
+};
