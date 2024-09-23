@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
+import { message } from 'antd'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   CContainer,
@@ -28,7 +29,34 @@ import {
 import { AppBreadcrumb } from './index'
 import { AppHeaderDropdown } from './header/index'
 
+import { useNavigate } from 'react-router-dom'
+import { auth } from '../authApi'
+
 const AppHeader = () => {
+  const navigate = useNavigate()
+  useEffect(() => {
+    authenToken()
+  }, [])
+
+  const handleError = (error) => {
+    message.error(error.response.data.message || error.message)
+    if (error.status == 403 || error.status == 401) {
+      navigate('/login')
+    } else if (error.status == 404) {
+      navigate('/404')
+    } else if (error.status == 500) {
+      navigate('/500')
+    }
+  }
+
+  const authenToken = async () => {
+    try {
+      await auth()
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
   const headerRef = useRef()
   const { colorMode, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
 

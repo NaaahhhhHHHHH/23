@@ -139,16 +139,16 @@ const Register = () => {
                   </CInputGroup>
                   <CRow>
                     <CCol xs={5}>
-                    <CButton type="submit" color="primary">
-                      Create Account
-                    </CButton>
+                      <CButton type="submit" color="primary">
+                        Create Account
+                      </CButton>
                     </CCol>
                     <CCol xs={6}>
-                    <Link to="/login">
-                    <CButton color="link" className="px-0">
-                      Already have account, Sign in
-                    </CButton>
-                    </Link>
+                      <Link to="/login">
+                        <CButton color="link" className="px-0">
+                          Already have account, Sign in
+                        </CButton>
+                      </Link>
                     </CCol>
                   </CRow>
                 </CForm>

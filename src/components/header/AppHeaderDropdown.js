@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   CAvatar,
   CBadge,
@@ -25,6 +26,31 @@ import CIcon from '@coreui/icons-react'
 import avatar8 from './../../assets/images/avatars/8.jpg'
 
 const AppHeaderDropdown = () => {
+  const navigate = useNavigate()
+  const Logout = async (e) => {
+    e.preventDefault()
+    //setErrorMessage(null) // Clear previous errors
+    try {
+      localStorage.removeItem('CRM-id')
+      localStorage.removeItem('CRM-name')
+      localStorage.removeItem('CRM-email')
+      localStorage.removeItem('CRM-username')
+      localStorage.removeItem('CRM-role')
+      localStorage.removeItem('CRM-verification')
+      localStorage.removeItem('CRM-token')
+      // if (!res.user.verification) {
+      //   navigate('/verification')
+      // }
+      //toast.success('Login successful')
+      navigate('/login')
+    } catch (error) {
+      // Handle error (e.g., wrong credentials or server error)
+      // setErrorMessage(error.message)
+      // navigate('/500')
+      toast.error(error.message)
+    }
+  }
+
   return (
     <CDropdown variant="nav-item">
       <CDropdownToggle placement="bottom-end" className="py-0 pe-0" caret={false}>
@@ -84,9 +110,9 @@ const AppHeaderDropdown = () => {
           </CBadge>
         </CDropdownItem>
         <CDropdownDivider />
-        <CDropdownItem href="#">
+        <CDropdownItem href="#" onClick={Logout}>
           <CIcon icon={cilLockLocked} className="me-2" />
-          Lock Account
+          Logout
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>

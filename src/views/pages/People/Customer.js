@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { Table, Input, Button, Modal, Form, message, Row, Col, Checkbox, Radio } from 'antd';
-import { useNavigate } from 'react-router-dom';
-import { updateData, createData, deleteData, getData } from '../../../api';
+import React, { useEffect, useState } from 'react'
+import { Table, Input, Button, Modal, Form, message, Row, Col, Checkbox, Radio } from 'antd'
+import { useNavigate } from 'react-router-dom'
+import { updateData, createData, deleteData, getData } from '../../../api'
 
 const CustomerTable = () => {
-  const [data, setData] = useState([]);
-  const [searchText, setSearchText] = useState('');
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentCustomer, setCurrentCustomer] = useState(null);
-  const [form] = Form.useForm();
+  const [data, setData] = useState([])
+  const [searchText, setSearchText] = useState('')
+  const [isModalVisible, setIsModalVisible] = useState(false)
+  const [currentCustomer, setCurrentCustomer] = useState(null)
+  const [form] = Form.useForm()
   const navigate = useNavigate()
 
   useEffect(() => {
-    loadCustomers();
-  }, []);
+    loadCustomers()
+  }, [])
 
   const handleError = (error) => {
-    message.error(error.response.data.message);
-    if (error.status == 403) {
+    message.error(error.response.data.message || error.message)
+    if (error.status == 403 || error.status == 401) {
       navigate('/login')
     } else if (error.status == 404) {
       navigate('/404')
@@ -28,52 +28,67 @@ const CustomerTable = () => {
 
   const loadCustomers = async () => {
     try {
-      const response = await getData('customer');
-      setData(response.data);
+      const response = await getData('customer')
+      setData(response.data)
     } catch (error) {
-      handleError(error);
+      handleError(error)
     }
-  };
+  }
 
   const handleSearch = (value) => {
-    setSearchText(value);
-  };
+    setSearchText(value)
+  }
 
   const filteredData = data.filter((item) =>
-    item.name.toLowerCase().includes(searchText.toLowerCase())
-  );
+    item.name.toLowerCase().includes(searchText.toLowerCase()),
+  )
 
   const showModal = (customer) => {
-    setCurrentCustomer(customer);
-    form.setFieldsValue(customer);
-    setIsModalVisible(true);
-  };
+    setCurrentCustomer(customer)
+    form.setFieldsValue(customer)
+    setIsModalVisible(true)
+  }
 
   const handleDelete = async (id) => {
     try {
-      let res = await deleteData('customer', id);
-      loadCustomers();
+      let res = await deleteData('customer', id)
+      loadCustomers()
       message.success(res.data.message)
     } catch (error) {
-      handleError(error);
+      handleError(error)
     }
-  };
+  }
 
   const handleAddOrUpdate = async (values) => {
     try {
-      let res = currentCustomer ? await updateData('customer', currentCustomer.id, values) : await createData('customer', values);
-      loadCustomers();
-      setIsModalVisible(false);
-      setCurrentCustomer(null);
-      form.resetFields();
+      let res = currentCustomer
+        ? await updateData('customer', currentCustomer.id, values)
+        : await createData('customer', values)
+      loadCustomers()
+      setIsModalVisible(false)
+      setCurrentCustomer(null)
+      form.resetFields()
       message.success(res.data.message)
     } catch (error) {
-      handleError(error);
+      handleError(error)
     }
-  };
+  }
+
+  const handleCloseModal = async (values) => {
+    // loadCustomers()
+    setIsModalVisible(false)
+    setCurrentCustomer(null)
+    form.resetFields()
+    //message.success(res.data.message)
+  }
 
   const columns = [
-    { title: 'Name', dataIndex: 'name', key: 'name', sorter: (a, b) => a.name.localeCompare(b.name) },
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: (a, b) => a.name.localeCompare(b.name),
+    },
     { title: 'Username', dataIndex: 'username', key: 'username' },
     { title: 'Email', dataIndex: 'email', key: 'email' },
     { title: 'Mobile', dataIndex: 'mobile', key: 'mobile' },
@@ -82,34 +97,45 @@ const CustomerTable = () => {
       title: 'Verification',
       dataIndex: 'verification',
       key: 'verification',
+      align: 'center',
       render: (text) => (
-        <div style={{
-            textAlign: 'center'
-          }}>
-          {text ? '✔' : '✖'}
+        <div
+          style={{
+            textAlign: 'center',
+          }}
+        >
+          {text ? '✔' : '❌'}
         </div>
       ),
     },
     {
       title: 'Action',
       key: 'action',
+      align: 'center',
       render: (text, record) => (
         <>
-          <Button type='primary' onClick={() => showModal(record)}>Edit</Button>
-          <Button type='primary' onClick={() => handleDelete(record.id)} style={{ marginLeft: 8 }} danger>
+          <Button type="primary" onClick={() => showModal(record)}>
+            Edit
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => handleDelete(record.id)}
+            style={{ marginLeft: 8 }}
+            danger
+          >
             Delete
           </Button>
         </>
       ),
     },
-  ];
+  ]
 
   const modalTitle = (
     <div style={{ textAlign: 'center', width: '100%' }}>
       {currentCustomer ? 'Edit Customer Form' : 'Add Customer Form'}
       <br></br>
     </div>
-  );
+  )
 
   return (
     <>
@@ -138,35 +164,79 @@ const CustomerTable = () => {
         title={modalTitle}
         visible={isModalVisible}
         style={{ top: 120 }}
-        onCancel={() => setIsModalVisible(false)}
+        onCancel={() => handleCloseModal()}
+        onClose={() => handleCloseModal()}
         footer={null}
       >
-        <Form form={form} onFinish={handleAddOrUpdate} labelCol={{ span: 6 }} wrapperCol={{ span: 15 }}>
-          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+        <Form
+          form={form}
+          onFinish={handleAddOrUpdate}
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 15 }}
+        >
+          <Form.Item
+            name="name"
+            label="Name"
+            rules={[{ required: true, message: 'Please input name!' }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="username" label="Username" rules={[{ required: true }]}>
+          <Form.Item
+            name="username"
+            label="Username"
+            rules={[{ required: true, message: 'Please input username!' }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: 'Please input email!' },
+              { type: 'email', message: 'Please input valid email!' },
+            ]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="mobile" label="Mobile" rules={[{ required: true }]}>
+          <Form.Item
+            name="mobile"
+            label="Mobile"
+            rules={[
+              { required: true, message: 'Please input mobile!' },
+              {
+                pattern: /^(\+1\s?)?(\(?\d{3}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}$/,
+                message: 'Please enter a valid US phone number!',
+              },
+            ]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="work" label="Work Mobile" rules={[{ required: false }]}>
+          <Form.Item
+            name="work"
+            label="Work Mobile"
+            rules={[
+              {
+                pattern: /^(\(?\d{3}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}$/,
+                message: 'Please enter a valid work phone number!',
+              },
+            ]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="password" label={currentCustomer ? 'New Password' : 'Password'} rules={[{ required: currentCustomer ? false : true }]}>
+          <Form.Item
+            name="password"
+            label={currentCustomer ? 'New Password' : 'Password'}
+            rules={[{ required: currentCustomer ? false : true }]}
+          >
             <Input.Password />
           </Form.Item>
-          <Form.Item name="verification" label="Verification">
+          <Form.Item name="verification" label="Verification" initialValue={false}>
             <Radio.Group>
               <Radio value={true}>True</Radio>
               <Radio value={false}>False</Radio>
             </Radio.Group>
           </Form.Item>
-          <div style={{textAlign: 'center'}}>
+          <div style={{ textAlign: 'center' }}>
             <Button type="primary" htmlType="submit">
               {currentCustomer ? 'Update' : 'Add'}
             </Button>
@@ -174,7 +244,7 @@ const CustomerTable = () => {
         </Form>
       </Modal>
     </>
-  );
-};
+  )
+}
 
-export default CustomerTable;
+export default CustomerTable

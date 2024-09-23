@@ -5,7 +5,6 @@ import { useSelector } from 'react-redux'
 import { CSpinner, useColorModes } from '@coreui/react'
 import './scss/style.scss'
 import { Toaster } from 'react-hot-toast'
-import { ConfigProvider } from 'antd';
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
