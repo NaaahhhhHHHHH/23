@@ -197,14 +197,16 @@ const CustomerTable = () => {
       dataIndex: 'name',
       key: 'name',
       ...getColumnSearchProps('name'),
-      width: 250,
+      width: 200,
+      ellipsis: true,
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
       title: 'Username',
       dataIndex: 'username',
       ...getColumnSearchProps('username'),
-      width: 250,
+      width: 200,
+      ellipsis: true,
       key: 'username',
     },
     {
@@ -218,16 +220,28 @@ const CustomerTable = () => {
       title: 'Mobile',
       dataIndex: 'mobile',
       ...getColumnSearchProps('mobile'),
-      width: 100,
+      width: 120,
       key: 'mobile',
     },
-    { title: 'Work', dataIndex: 'work', ...getColumnSearchProps('work'), width: 100, key: 'work' },
+    { title: 'Work', dataIndex: 'work', ...getColumnSearchProps('work'), width: 120, key: 'work' },
     {
       title: 'Verification',
       dataIndex: 'verification',
       key: 'verification',
       align: 'center',
-      width: 100,
+      width: 120,
+      filters: [
+        {
+          text: '✔',
+          value: true,
+        },
+        {
+          text: '❌',
+          value: false,
+        },
+      ],
+      onFilter: (value, record) => record.verification === value,
+      //filterSearch: true,
       render: (text) => (
         <div
           style={{
@@ -242,6 +256,7 @@ const CustomerTable = () => {
       title: 'Action',
       key: 'action',
       align: 'center',
+      width: 250,
       render: (text, record) => (
         <>
           <Button type="primary" onClick={() => showModal(record)}>

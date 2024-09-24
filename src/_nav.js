@@ -271,7 +271,7 @@ const _nav = [
   // },
   {
     component: CNavTitle,
-    name: 'Extras',
+    name: 'Management',
   },
   {
     component: CNavGroup,

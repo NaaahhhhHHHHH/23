@@ -1,15 +1,124 @@
-import React, { useEffect, useState } from 'react'
-import { Table, Input, Button, Modal, Form, message, Row, Col } from 'antd'
+import React, { useEffect, useState, useRef } from 'react'
+import { Table, Space, Input, Button, Modal, Form, message, Row, Col, Checkbox, Radio } from 'antd'
 import { useNavigate } from 'react-router-dom'
-import { getData, createData, updateData, deleteData } from '../../../api'
+import { updateData, createData, deleteData, getData } from '../../../api'
+import { SearchOutlined } from '@ant-design/icons'
+import Highlighter from 'react-highlight-words'
 
 const OwnerTable = () => {
   const [data, setData] = useState([])
-  const [searchText, setSearchText] = useState('')
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [currentOwner, setCurrentOwner] = useState(null)
   const [form] = Form.useForm()
   const navigate = useNavigate()
+
+  const [searchText, setSearchText] = useState('')
+  const [searchedColumn, setSearchedColumn] = useState('')
+  const searchInput = useRef(null)
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm()
+    setSearchText(selectedKeys[0])
+    setSearchedColumn(dataIndex)
+  }
+  const handleReset = (clearFilters) => {
+    clearFilters()
+    setSearchText('')
+  }
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div
+        style={{
+          padding: 8,
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{
+            marginBottom: 8,
+            display: 'block',
+          }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({
+                closeDropdown: false,
+              })
+              setSearchText(selectedKeys[0])
+              setSearchedColumn(dataIndex)
+            }}
+          >
+            Filter
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close()
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? '#1677ff' : undefined,
+        }}
+      />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100)
+      }
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: '#ffc069',
+            padding: 0,
+          }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ''}
+        />
+      ) : (
+        text
+      ),
+  })
 
   useEffect(() => {
     loadOwners()
@@ -35,9 +144,9 @@ const OwnerTable = () => {
     }
   }
 
-  const handleSearch = (value) => {
-    setSearchText(value)
-  }
+  // const handleSearch = (value) => {
+  //   setSearchText(value)
+  // }
 
   const handleCloseModal = async (values) => {
     // loadCustomers()
@@ -47,9 +156,9 @@ const OwnerTable = () => {
     //message.success(res.data.message)
   }
 
-  const filteredData = data.filter((item) =>
-    item.name.toLowerCase().includes(searchText.toLowerCase()),
-  )
+  // const filteredData = data.filter((item) =>
+  //   item.name.toLowerCase().includes(searchText.toLowerCase()),
+  // )
 
   const showModal = (owner) => {
     setCurrentOwner(owner)
@@ -87,12 +196,15 @@ const OwnerTable = () => {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
+      ...getColumnSearchProps('name'),
+      width: 250,
       sorter: (a, b) => a.name.localeCompare(b.name),
+      ellipsis: true,
     },
-    { title: 'Username', dataIndex: 'username', key: 'username' },
-    { title: 'Email', dataIndex: 'email', key: 'email' },
-    { title: 'Mobile', dataIndex: 'mobile', key: 'mobile' },
-    { title: 'Work', dataIndex: 'work', key: 'work' },
+    { title: 'Username', dataIndex: 'username', key: 'username', width: 250, ...getColumnSearchProps('username'), ellipsis: true, },
+    { title: 'Email', dataIndex: 'email', key: 'email', width: 250, ...getColumnSearchProps('email'), ellipsis: true, },
+    { title: 'Mobile', dataIndex: 'mobile', key: 'mobile', width: 150, ...getColumnSearchProps('mobile') },
+    { title: 'Work', dataIndex: 'work', key: 'work', width: 150, ...getColumnSearchProps('work') },
     {
       title: 'Action',
       key: 'action',
@@ -124,16 +236,16 @@ const OwnerTable = () => {
 
   return (
     <>
-      <Row style={{ marginBottom: 16 }}>
-        <Col span={12}>
+      <Row style={{ display: 'block', marginBottom: 15, textAlign: 'right' }}>
+        {/* <Col span={12}>
           <Input.Search
             placeholder="Search by name"
             onSearch={handleSearch}
             enterButton
             style={{ width: '100%' }}
           />
-        </Col>
-        <Col span={12} style={{ textAlign: 'right' }}>
+        </Col> */}
+        <Col>
           <Button type="primary" onClick={() => showModal(null)}>
             + Add
           </Button>
@@ -141,8 +253,8 @@ const OwnerTable = () => {
       </Row>
       <Table
         columns={columns}
-        dataSource={filteredData}
-        pagination={{ pageSize: 5 }}
+        dataSource={data}
+        pagination={{ pageSize: 10 }}
         locale={{ emptyText: 'No owners found' }}
       />
       <Modal
