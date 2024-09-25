@@ -201,9 +201,29 @@ const EmployeeTable = () => {
       sorter: (a, b) => a.name.localeCompare(b.name),
       ellipsis: true,
     },
-    { title: 'Username', dataIndex: 'username', key: 'username', width: 250, ...getColumnSearchProps('username'), ellipsis: true, },
-    { title: 'Email', dataIndex: 'email', key: 'email', width: 250, ...getColumnSearchProps('email'), ellipsis: true, },
-    { title: 'Mobile', dataIndex: 'mobile', key: 'mobile', width: 150, ...getColumnSearchProps('mobile') },
+    {
+      title: 'Username',
+      dataIndex: 'username',
+      key: 'username',
+      width: 250,
+      ...getColumnSearchProps('username'),
+      ellipsis: true,
+    },
+    {
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
+      width: 250,
+      ...getColumnSearchProps('email'),
+      ellipsis: true,
+    },
+    {
+      title: 'Mobile',
+      dataIndex: 'mobile',
+      key: 'mobile',
+      width: 150,
+      ...getColumnSearchProps('mobile'),
+    },
     { title: 'Work', dataIndex: 'work', key: 'work', width: 150, ...getColumnSearchProps('work') },
     {
       title: 'Action',
@@ -259,7 +279,7 @@ const EmployeeTable = () => {
       />
       <Modal
         title={modalTitle}
-        visible={isModalVisible}
+        open={isModalVisible}
         style={{ top: 120 }}
         onCancel={() => handleCloseModal()}
         onClose={() => handleCloseModal()}

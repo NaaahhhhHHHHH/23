@@ -307,7 +307,7 @@ const CustomerTable = () => {
       />
       <Modal
         title={modalTitle}
-        visible={isModalVisible}
+        open={isModalVisible}
         style={{ top: 120 }}
         onCancel={() => handleCloseModal()}
         onClose={() => handleCloseModal()}

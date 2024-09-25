@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom'
 import { SearchOutlined } from '@ant-design/icons'
 import { updateData, createData, deleteData, getData } from '../../../api'
 import Highlighter from 'react-highlight-words'
+import DynamicFormModal from './ModalForm'
 
 const { Step } = Steps
 const { TextArea } = Input
@@ -27,18 +28,32 @@ const ServiceTable = () => {
   const [data, setData] = useState([])
   //const [searchText, setSearchText] = useState('')
   const [isModalVisible, setIsModalVisible] = useState(false)
+  const [isViewModalVisible, setIsViewModalVisible] = useState(false)
   const [currentService, setCurrentService] = useState(null)
   const [form] = Form.useForm()
   const [currentStep, setCurrentStep] = useState(0)
   const [step1Values, setStep1Values] = useState({})
   const [formDataArray, setFormDataArray] = useState([
-    { type: 'input', label: '', required: false, initvalue: '' },
+    { type: 'input', label: '', required: false, fieldname: 'field_1' },
   ]) // Default one field
   const navigate = useNavigate()
 
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
   const searchInput = useRef(null)
+
+  const handleOpenViewModal = () => {
+    setIsViewModalVisible(true)
+  }
+
+  const handleCloseViewModal = () => {
+    setIsViewModalVisible(false)
+  }
+
+  const handleSubmitViewModal = (values) => {
+    console.log('Submitted Values:', values)
+    handleCloseViewModal()
+  }
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm()
@@ -181,11 +196,26 @@ const ServiceTable = () => {
     form.setFieldsValue(service)
     if (service) {
       setFormDataArray(
-        service.formData || [{ type: 'input', label: '', required: false, initvalue: '' }],
+        service.formData || [
+          {
+            type: 'input',
+            label: '',
+            required: false,
+            fieldname: `field_1`,
+          },
+        ],
       ) // Load existing formData
     }
     setIsModalVisible(true)
     setCurrentStep(0)
+  }
+
+  const showViewModal = (service) => {
+    setCurrentService(service)
+    if (service) {
+      setFormDataArray(service.formData) // Load existing formData
+    }
+    setIsViewModalVisible(true)
   }
 
   const handleDelete = async (id) => {
@@ -198,16 +228,22 @@ const ServiceTable = () => {
     }
   }
 
+  const validateFormDataArray = () => {
+    for (let field of formDataArray) {
+      if (!field.label) {
+      }
+    }
+  }
+
   const handleAddOrUpdate = async (values) => {
     try {
+      let valid = await form.validateFields()
       let formData = { ...step1Values, formData: formDataArray } // Add formDataArray to form values
       let res = currentService
         ? await updateData('service', currentService.id, formData)
         : await createData('service', formData)
       loadServices()
-      setIsModalVisible(false)
-      setCurrentService(null)
-      form.resetFields()
+      handleCloseModal()
       message.success(res.data.message)
     } catch (error) {
       handleError(error)
@@ -217,7 +253,7 @@ const ServiceTable = () => {
   const handleCloseModal = () => {
     setIsModalVisible(false)
     setCurrentService(null)
-    setFormDataArray([{ type: 'input', label: '', required: false, initvalue: '' }])
+    setFormDataArray([{ type: 'input', label: '', required: false, fieldname: `field_1` }])
     form.resetFields()
   }
 
@@ -242,7 +278,7 @@ const ServiceTable = () => {
   const handleAddField = () => {
     setFormDataArray([
       ...formDataArray,
-      { type: 'input', label: '', required: false, initvalue: '' },
+      { type: 'input', label: '', required: false, fieldname: `field_${formDataArray.length + 1}` },
     ])
   }
   const handleAddOption = (index, field) => {
@@ -321,6 +357,9 @@ const ServiceTable = () => {
           >
             Delete
           </Button>
+          <Button type="primary" onClick={() => showViewModal(record)} style={{ marginLeft: 8 }}>
+            View Form
+          </Button>
         </>
       ),
     },
@@ -354,6 +393,12 @@ const ServiceTable = () => {
         dataSource={data}
         pagination={{ pageSize: 10 }}
         locale={{ emptyText: 'No services found' }}
+      />
+      <DynamicFormModal
+        visible={isViewModalVisible}
+        onClose={handleCloseViewModal}
+        formDataArray={formDataArray}
+        onSubmit={handleSubmitViewModal}
       />
       <Modal
         title={modalTitle}
@@ -414,11 +459,15 @@ const ServiceTable = () => {
                 <div key={index} /*style={{ marginBottom: 10 }}*/>
                   <Row gutter={10}>
                     <Col span={7}>
-                      <Form.Item label="Type" style={{ marginBottom: 5 }} labelCol={{ span: 6 }}>
-                        <Select
-                          value={field.type}
-                          onChange={(value) => handleFieldChange(index, 'type', value)}
-                        >
+                      <Form.Item
+                        label="Type"
+                        name={`type_${index}`}
+                        style={{ marginBottom: 5 }}
+                        labelCol={{ span: 6 }}
+                        initialValue={field.type}
+                        rules={[{ required: true, message: 'Please input field type' }]}
+                      >
+                        <Select onChange={(value) => handleFieldChange(index, 'type', value)}>
                           <Select.Option value="input">Input</Select.Option>
                           <Select.Option value="textarea">TextArea</Select.Option>
                           <Select.Option value="select">Select</Select.Option>
@@ -428,10 +477,15 @@ const ServiceTable = () => {
                       </Form.Item>
                     </Col>
                     <Col span={7}>
-                      <Form.Item label="Init" style={{ marginBottom: 5 }}>
+                      <Form.Item
+                        label="Name"
+                        name={`name_${index}`}
+                        style={{ marginBottom: 5 }}
+                        initialValue={field.fieldname}
+                        rules={[{ required: true, message: 'Please input field name' }]}
+                      >
                         <Input
-                          value={field.initvalue}
-                          onChange={(e) => handleFieldChange(index, 'initvalue', e.target.value)}
+                          onChange={(e) => handleFieldChange(index, 'fieldname', e.target.value)}
                         />
                       </Form.Item>
                     </Col>
@@ -441,6 +495,7 @@ const ServiceTable = () => {
                         labelCol={{ span: 7 }}
                         wrapperCol={{ span: 5 }}
                         style={{ marginBottom: 5 }}
+                        name={`required_${index}`}
                       >
                         <Checkbox
                           checked={field.required}
@@ -455,6 +510,23 @@ const ServiceTable = () => {
                       </Button>
                     </Col>
                   </Row>
+                  <Row gutter={10}>
+                    <Col span={21}>
+                      <Form.Item
+                        labelCol={{ span: 2 }}
+                        wrapperCol={{ span: 20 }}
+                        label="Label"
+                        name={`label_${index}`}
+                        style={{ marginBottom: 5 }}
+                        initialValue={field.label}
+                        rules={[{ required: true, message: 'Please input field label' }]}
+                      >
+                        <TextArea
+                          onChange={(e) => handleFieldChange(index, 'label', e.target.value)}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
                   {(field.type === 'select' ||
                     field.type === 'radio' ||
                     field.type === 'checkbox') && (
@@ -465,13 +537,15 @@ const ServiceTable = () => {
                             <Col span={6}>
                               <Row>
                                 <Form.Item
-                                  labelCol={{ span: 7 }}
-                                  wrapperCol={{ span: 22 }}
+                                  labelCol={{ span: 10 }}
+                                  wrapperCol={{ span: 25 }}
                                   label={`Option ${indexOption + 1}`}
                                   style={{ marginBottom: 5 }}
+                                  name={`option_${index}_${indexOption}`}
+                                  initialValue={Option}
+                                  rules={[{ required: true, message: 'Please input option label' }]}
                                 >
                                   <Input
-                                    value={Option}
                                     onChange={(e) =>
                                       handleFieldOptionChange(
                                         index,
@@ -484,17 +558,22 @@ const ServiceTable = () => {
                                 </Form.Item>
                               </Row>
                             </Col>
-                            <Button
-                              color="danger"
-                              variant="link"
-                              //   icon={<DeleteOutlined />}
-                              style={{ padding: '2px 15px 2px 2px' }}
-                              onClick={(e) => handleDeleteOption(index, 'option', indexOption)}
-                            >
-                              x
-                            </Button>
+                            {field.option.length > 1 && (
+                              <>
+                                <Button
+                                  color="danger"
+                                  variant="link"
+                                  //   icon={<DeleteOutlined />}
+                                  style={{ padding: '2px 15px 2px 2px' }}
+                                  onClick={(e) => handleDeleteOption(index, 'option', indexOption)}
+                                >
+                                  x
+                                </Button>
+                              </>
+                            )}
                           </>
                         ))}
+
                         <Button
                           color="primary"
                           variant="dashed"
@@ -506,16 +585,6 @@ const ServiceTable = () => {
                       </Row>
                     </>
                   )}
-                  <Row gutter={10}>
-                    <Col span={21}>
-                      <Form.Item labelCol={{ span: 2 }} label="Label" style={{ marginBottom: 1 }}>
-                        <TextArea
-                          value={field.label}
-                          onChange={(e) => handleFieldChange(index, 'label', e.target.value)}
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
                   <Divider style={{ margin: '10px 0' }}></Divider>
                 </div>
               ))}
