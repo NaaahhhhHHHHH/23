@@ -2,7 +2,14 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Table, Space, Input, Button, Modal, Form, message, Row, Col, Checkbox, Radio } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { updateData, createData, deleteData, getData } from '../../../api'
-import { SearchOutlined } from '@ant-design/icons'
+import {
+  SearchOutlined,
+  CloseOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  FolderViewOutlined,
+  FileAddOutlined,
+} from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
 
 const OwnerTable = () => {
@@ -231,16 +238,22 @@ const OwnerTable = () => {
       align: 'center',
       render: (text, record) => (
         <>
-          <Button type="primary" onClick={() => showModal(record)}>
-            Edit
+          <Button
+            color="primary"
+            size="large"
+            style={{ marginLeft: 5 }}
+            variant="text"
+            onClick={() => showModal(record)}
+          >
+            <EditOutlined />
           </Button>
           <Button
-            type="primary"
+            size="large"
+            color="danger"
+            variant="text"
             onClick={() => handleDelete(record.id)}
-            style={{ marginLeft: 8 }}
-            danger
           >
-            Delete
+            <DeleteOutlined />
           </Button>
         </>
       ),
@@ -256,7 +269,7 @@ const OwnerTable = () => {
 
   return (
     <>
-      <Row style={{ display: 'block', marginBottom: 15, textAlign: 'right' }}>
+      <Row style={{ display: 'block', marginBottom: 5, textAlign: 'right' }}>
         {/* <Col span={12}>
           <Input.Search
             placeholder="Search by name"
@@ -266,8 +279,8 @@ const OwnerTable = () => {
           />
         </Col> */}
         <Col>
-          <Button type="primary" onClick={() => showModal(null)}>
-            + Add
+          <Button color="primary" variant="text" size="large" onClick={() => showModal(null)}>
+            <FileAddOutlined></FileAddOutlined>
           </Button>
         </Col>
       </Row>

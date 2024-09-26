@@ -2,7 +2,14 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Table, Space, Input, Button, Modal, Form, message, Row, Col, Checkbox, Radio } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { updateData, createData, deleteData, getData } from '../../../api'
-import { SearchOutlined } from '@ant-design/icons'
+import {
+  SearchOutlined,
+  CheckOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  CloseOutlined,
+  FileAddOutlined,
+} from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
 
 const CustomerTable = () => {
@@ -232,11 +239,11 @@ const CustomerTable = () => {
       width: 120,
       filters: [
         {
-          text: '✔',
+          text: <CheckOutlined style={{ color: 'green' }} />,
           value: true,
         },
         {
-          text: '❌',
+          text: <CloseOutlined style={{ color: 'red' }} />,
           value: false,
         },
       ],
@@ -248,7 +255,11 @@ const CustomerTable = () => {
             textAlign: 'center',
           }}
         >
-          {text ? '✔' : '❌'}
+          {text ? (
+            <CheckOutlined style={{ color: 'green' }} />
+          ) : (
+            <CloseOutlined style={{ color: 'red' }} />
+          )}
         </div>
       ),
     },
@@ -259,16 +270,22 @@ const CustomerTable = () => {
       width: 250,
       render: (text, record) => (
         <>
-          <Button type="primary" onClick={() => showModal(record)}>
-            Edit
+          <Button
+            color="primary"
+            size="large"
+            style={{ marginLeft: 5 }}
+            variant="text"
+            onClick={() => showModal(record)}
+          >
+            <EditOutlined style={{ fontSize: '20px' }} />
           </Button>
           <Button
-            type="primary"
+            size="large"
+            color="danger"
+            variant="text"
             onClick={() => handleDelete(record.id)}
-            style={{ marginLeft: 8 }}
-            danger
           >
-            Delete
+            <DeleteOutlined style={{ fontSize: '20px' }} />
           </Button>
         </>
       ),
@@ -284,7 +301,7 @@ const CustomerTable = () => {
 
   return (
     <>
-      <Row style={{ display: 'block', marginBottom: 15, textAlign: 'right' }}>
+      <Row style={{ display: 'block', marginBottom: 5, textAlign: 'right' }}>
         {/* <Col span={12}>
           <Input.Search
             placeholder="Search by name"
@@ -294,8 +311,8 @@ const CustomerTable = () => {
           />
         </Col> */}
         <Col>
-          <Button type="primary" onClick={() => showModal(null)}>
-            + Add
+          <Button color="primary" variant="text" size="large" onClick={() => showModal(null)}>
+            <FileAddOutlined></FileAddOutlined>
           </Button>
         </Col>
       </Row>

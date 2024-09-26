@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Modal, Form, Input, Button, Select, Checkbox, Radio, Row, Col, message } from 'antd'
 
-const DynamicFormModal = ({ visible, onClose, formDataArray, onSubmit }) => {
+const DynamicFormModal = ({ title, visible, onClose, formDataArray, onSubmit }) => {
   const [form] = Form.useForm()
   const [fields, setFields] = useState([])
 
@@ -34,14 +34,26 @@ const DynamicFormModal = ({ visible, onClose, formDataArray, onSubmit }) => {
     onClose()
   }
 
+  const modalTitle = (
+    <div style={{ textAlign: 'center', width: '100%' }}>
+      {`${title} Form`}
+    </div>
+  )
+
+  const formItemLabelStyle = {
+    whiteSpace: 'pre-wrap',
+    wordWrap: 'break-word',
+    maxWidth: '95%',
+  };
+
   return (
     <Modal
-      title="Demo Form"
+      title={modalTitle}
       open={visible}
       onCancel={onClose}
       footer={null}
       width={700}
-      style={{ top: 120, maxHeight: '75vh', overflowY: 'auto', overflowX: 'hidden' }}
+      style={{ top: 120, maxHeight: '85vh', overflowY: 'auto', overflowX: 'hidden' }}
     >
       <Form form={form} layout="vertical" onFinish={handleFinish}>
         {fields.map((field, index) => {
@@ -50,7 +62,7 @@ const DynamicFormModal = ({ visible, onClose, formDataArray, onSubmit }) => {
               return (
                 <Form.Item
                   key={index}
-                  label={field.label}
+                  label={<span style={formItemLabelStyle}>{field.label}</span>}
                   name={field.name}
                   rules={field.rules}
                   //   initialValue={field.initialValue}
@@ -62,7 +74,7 @@ const DynamicFormModal = ({ visible, onClose, formDataArray, onSubmit }) => {
               return (
                 <Form.Item
                   key={index}
-                  label={field.label}
+                  label={<span style={formItemLabelStyle}>{field.label}</span>}
                   name={field.name}
                   rules={field.rules}
                   //   initialValue={field.initialValue}
@@ -74,7 +86,7 @@ const DynamicFormModal = ({ visible, onClose, formDataArray, onSubmit }) => {
               return (
                 <Form.Item
                   key={index}
-                  label={field.label}
+                  label={<span style={formItemLabelStyle}>{field.label}</span>}
                   name={field.name}
                   rules={field.rules}
                   initialValue={field.initialValue}
@@ -92,14 +104,14 @@ const DynamicFormModal = ({ visible, onClose, formDataArray, onSubmit }) => {
               return (
                 <Form.Item
                   key={index}
-                  label={field.label}
+                  label={<span style={formItemLabelStyle}>{field.label}</span>}
                   name={field.name}
                   rules={field.rules}
                   //   initialValue={field.initialValue}
                 >
-                  <Radio.Group>
+                  <Radio.Group style={{display: "inline-grid"}}>
                     {field.options.map((option, idx) => (
-                      <Radio key={idx} value={idx}>
+                      <Radio key={idx} value={idx} style={ formItemLabelStyle }>
                         {option}
                       </Radio>
                     ))}
@@ -110,14 +122,14 @@ const DynamicFormModal = ({ visible, onClose, formDataArray, onSubmit }) => {
               return (
                 <Form.Item
                   key={index}
-                  label={field.label}
+                  label={<span style={formItemLabelStyle}>{field.label}</span>}
                   name={field.name}
                   rules={field.rules}
                   //   initialValue={field.initialValue}
                 >
-                  <Checkbox.Group>
+                  <Checkbox.Group dir style={{display: "inline-grid"}}>
                     {field.options.map((option, idx) => (
-                      <Checkbox key={idx} value={idx}>
+                      <Checkbox key={idx} value={idx} style={formItemLabelStyle}>
                         {option}
                       </Checkbox>
                     ))}

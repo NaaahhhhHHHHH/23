@@ -14,9 +14,17 @@ import {
   InputNumber,
   Divider,
   Space,
+  Card,
 } from 'antd'
 import { useNavigate } from 'react-router-dom'
-import { SearchOutlined } from '@ant-design/icons'
+import {
+  SearchOutlined,
+  CloseOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  FolderViewOutlined,
+  FileAddOutlined,
+} from '@ant-design/icons'
 import { updateData, createData, deleteData, getData } from '../../../api'
 import Highlighter from 'react-highlight-words'
 import DynamicFormModal from './ModalForm'
@@ -28,6 +36,7 @@ const ServiceTable = () => {
   const [data, setData] = useState([])
   //const [searchText, setSearchText] = useState('')
   const [isModalVisible, setIsModalVisible] = useState(false)
+  const [serviceName, setServiceName] = useState('')
   const [isViewModalVisible, setIsViewModalVisible] = useState(false)
   const [currentService, setCurrentService] = useState(null)
   const [form] = Form.useForm()
@@ -212,6 +221,7 @@ const ServiceTable = () => {
 
   const showViewModal = (service) => {
     setCurrentService(service)
+    setServiceName(service.name)
     if (service) {
       setFormDataArray(service.formData) // Load existing formData
     }
@@ -276,41 +286,48 @@ const ServiceTable = () => {
   }
 
   const handleAddField = () => {
-    setFormDataArray([
+    const newData = [
       ...formDataArray,
       { type: 'input', label: '', required: false, fieldname: `field_${formDataArray.length + 1}` },
-    ])
+    ]
+    setFormDataArray(newData)
+    form.setFieldsValue({ formData: newData })
   }
   const handleAddOption = (index, field) => {
     const newData = [...formDataArray]
     newData[index][field].push('')
     setFormDataArray(newData)
+    form.setFieldsValue({ formData: newData })
   }
 
   const handleDeleteOption = (index, field, indexOption) => {
     const newData = [...formDataArray]
     newData[index][field].splice(indexOption, 1)
     setFormDataArray(newData)
+    form.setFieldsValue({ formData: newData })
   }
 
   const handleRemoveField = (index) => {
     const newData = formDataArray.filter((_, i) => i !== index)
     setFormDataArray(newData)
+    form.setFieldsValue({ formData: newData })
   }
 
   const handleFieldChange = (index, field, value) => {
     const newData = [...formDataArray]
     newData[index][field] = value
     if (field == 'type' && (value == 'select' || value == 'radio' || value == 'checkbox')) {
-      newData[index].option = ['', '', '']
+      newData[index].option = ['', '']
     }
     setFormDataArray(newData)
+    form.setFieldsValue({ formData: newData })
   }
 
   const handleFieldOptionChange = (index, field, indexOption, value) => {
     const newData = [...formDataArray]
     newData[index][field][indexOption] = value
     setFormDataArray(newData)
+    form.setFieldsValue({ formData: newData })
   }
 
   const columns = [
@@ -346,19 +363,32 @@ const ServiceTable = () => {
       align: 'center',
       render: (text, record) => (
         <>
-          <Button type="primary" onClick={() => showModal(record)}>
-            Edit
+          <Button
+            color="primary"
+            size="large"
+            style={{ marginLeft: 5 }}
+            variant="text"
+            onClick={() => showModal(record)}
+          >
+            <EditOutlined style={{ fontSize: '20px' }}/>
+          </Button>
+
+          <Button
+            color="primary"
+            size="large"
+            variant="text"
+            onClick={() => showViewModal(record)}
+            style={{ marginLeft: 5 }}
+          >
+            <FolderViewOutlined style={{ fontSize: '20px' }}/>
           </Button>
           <Button
-            type="primary"
+            size="large"
+            color="danger"
+            variant="text"
             onClick={() => handleDelete(record.id)}
-            style={{ marginLeft: 8 }}
-            danger
           >
-            Delete
-          </Button>
-          <Button type="primary" onClick={() => showViewModal(record)} style={{ marginLeft: 8 }}>
-            View Form
+            <DeleteOutlined style={{ fontSize: '20px' }}/>
           </Button>
         </>
       ),
@@ -373,7 +403,7 @@ const ServiceTable = () => {
 
   return (
     <>
-      <Row style={{ display: 'block', marginBottom: 15, textAlign: 'right' }}>
+      <Row style={{ display: 'block', marginBottom: 5, textAlign: 'right' }}>
         {/* <Col span={12}>
           <Input.Search
             placeholder="Search by name"
@@ -383,8 +413,8 @@ const ServiceTable = () => {
           />
         </Col> */}
         <Col>
-          <Button type="primary" onClick={() => showModal(null)}>
-            + Add
+          <Button color="primary" variant="text" size="large" onClick={() => showModal(null)}>
+            <FileAddOutlined style={{ fontSize: '20px' }}></FileAddOutlined>
           </Button>
         </Col>
       </Row>
@@ -395,6 +425,7 @@ const ServiceTable = () => {
         locale={{ emptyText: 'No services found' }}
       />
       <DynamicFormModal
+        title={serviceName}
         visible={isViewModalVisible}
         onClose={handleCloseViewModal}
         formDataArray={formDataArray}
@@ -403,7 +434,7 @@ const ServiceTable = () => {
       <Modal
         title={modalTitle}
         open={isModalVisible}
-        style={{ top: 120, maxHeight: '75vh', overflowY: 'auto', overflowX: 'hidden' }}
+        style={{ top: 120, maxHeight: '85vh', overflowY: 'auto', overflowX: 'hidden' }}
         width={1000}
         onCancel={handleCloseModal}
         footer={null}
@@ -417,7 +448,7 @@ const ServiceTable = () => {
           form={form}
           onFinish={handleAddOrUpdate}
           labelCol={{ span: 6 }}
-          wrapperCol={{ span: 15 }}
+          wrapperCol={{ span: 17 }}
           style={{
             marginTop: 20,
             maxWidth: 'none',
@@ -456,15 +487,29 @@ const ServiceTable = () => {
             <>
               {/* Step 2: Form Data */}
               {formDataArray.map((field, index) => (
-                <div key={index} /*style={{ marginBottom: 10 }}*/>
+                <Card
+                  key={index}
+                  size="small"
+                  title={`Field ${index + 1}`}
+                  marginLeft={70}
+                  style={{ marginBottom: 15 }}
+                  bodyStyle={{ marginLeft: 50 }}
+                  extra={
+                    <CloseOutlined
+                      onClick={() => {
+                        handleRemoveField(index)
+                      }}
+                    />
+                  }
+                >
                   <Row gutter={10}>
                     <Col span={7}>
                       <Form.Item
                         label="Type"
-                        name={`type_${index}`}
-                        style={{ marginBottom: 5 }}
+                        name={['formData', index, 'type']}
+                        style={{ marginBottom: 5, marginLeft: 34 }}
                         labelCol={{ span: 6 }}
-                        initialValue={field.type}
+                        initialValue={'input'}
                         rules={[{ required: true, message: 'Please input field type' }]}
                       >
                         <Select onChange={(value) => handleFieldChange(index, 'type', value)}>
@@ -479,9 +524,9 @@ const ServiceTable = () => {
                     <Col span={7}>
                       <Form.Item
                         label="Name"
-                        name={`name_${index}`}
+                        name={['formData', index, 'fieldname']}
                         style={{ marginBottom: 5 }}
-                        initialValue={field.fieldname}
+                        initialValue={`field_${index + 1}`}
                         rules={[{ required: true, message: 'Please input field name' }]}
                       >
                         <Input
@@ -495,7 +540,7 @@ const ServiceTable = () => {
                         labelCol={{ span: 7 }}
                         wrapperCol={{ span: 5 }}
                         style={{ marginBottom: 5 }}
-                        name={`required_${index}`}
+                        name={['formData', index, 'required']}
                       >
                         <Checkbox
                           checked={field.required}
@@ -504,21 +549,21 @@ const ServiceTable = () => {
                       </Form.Item>
                     </Col>
 
-                    <Col span={2}>
+                    {/* <Col span={2}>
                       <Button type="primary" onClick={() => handleRemoveField(index)} danger>
                         Delete
                       </Button>
-                    </Col>
+                    </Col> */}
                   </Row>
                   <Row gutter={10}>
-                    <Col span={21}>
+                    <Col span={20}>
                       <Form.Item
                         labelCol={{ span: 2 }}
-                        wrapperCol={{ span: 20 }}
+                        wrapperCol={{ span: 21 }}
                         label="Label"
-                        name={`label_${index}`}
-                        style={{ marginBottom: 5 }}
-                        initialValue={field.label}
+                        name={['formData', index, 'label']}
+                        style={{ marginBottom: 5, marginLeft: 30 }}
+                        initialValue={''}
                         rules={[{ required: true, message: 'Please input field label' }]}
                       >
                         <TextArea
@@ -531,32 +576,30 @@ const ServiceTable = () => {
                     field.type === 'radio' ||
                     field.type === 'checkbox') && (
                     <>
-                      <Row gutter={10}>
+                      <Row gutter={10} style={{ left: -15 }}>
                         {field.option.map((Option, indexOption) => (
                           <>
-                            <Col span={6}>
-                              <Row>
-                                <Form.Item
-                                  labelCol={{ span: 10 }}
-                                  wrapperCol={{ span: 25 }}
-                                  label={`Option ${indexOption + 1}`}
-                                  style={{ marginBottom: 5 }}
-                                  name={`option_${index}_${indexOption}`}
-                                  initialValue={Option}
-                                  rules={[{ required: true, message: 'Please input option label' }]}
-                                >
-                                  <Input
-                                    onChange={(e) =>
-                                      handleFieldOptionChange(
-                                        index,
-                                        'option',
-                                        indexOption,
-                                        e.target.value,
-                                      )
-                                    }
-                                  />
-                                </Form.Item>
-                              </Row>
+                            <Col span={10}>
+                              <Form.Item
+                                labelCol={{ span: 6 }}
+                                wrapperCol={{ span: 30 }}
+                                label={`Option ${indexOption + 1}`}
+                                style={{ marginBottom: 5 }}
+                                name={['formData', index, 'option', indexOption]}
+                                initialValue={Option}
+                                rules={[{ required: true, message: 'Please input option' }]}
+                              >
+                                <Input.TextArea
+                                  onChange={(e) =>
+                                    handleFieldOptionChange(
+                                      index,
+                                      'option',
+                                      indexOption,
+                                      e.target.value,
+                                    )
+                                  }
+                                />
+                              </Form.Item>
                             </Col>
                             {field.option.length > 1 && (
                               <>
@@ -564,7 +607,7 @@ const ServiceTable = () => {
                                   color="danger"
                                   variant="link"
                                   //   icon={<DeleteOutlined />}
-                                  style={{ padding: '2px 15px 2px 2px' }}
+                                  style={{ padding: '1px 13px 1px 1px' }}
                                   onClick={(e) => handleDeleteOption(index, 'option', indexOption)}
                                 >
                                   x
@@ -585,8 +628,7 @@ const ServiceTable = () => {
                       </Row>
                     </>
                   )}
-                  <Divider style={{ margin: '10px 0' }}></Divider>
-                </div>
+                </Card>
               ))}
               <Button
                 variant="dashed"
