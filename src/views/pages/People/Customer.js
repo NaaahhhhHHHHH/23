@@ -256,9 +256,9 @@ const CustomerTable = () => {
           }}
         >
           {text ? (
-            <CheckOutlined style={{ color: 'green' }} />
+            <CheckOutlined style={{ color: 'green', fontSize: '18px' }} />
           ) : (
-            <CloseOutlined style={{ color: 'red' }} />
+            <CloseOutlined style={{ color: 'red', fontSize: '18px' }} />
           )}
         </div>
       ),
@@ -267,13 +267,11 @@ const CustomerTable = () => {
       title: 'Action',
       key: 'action',
       align: 'center',
-      width: 250,
       render: (text, record) => (
         <>
           <Button
             color="primary"
             size="large"
-            style={{ marginLeft: 5 }}
             variant="text"
             onClick={() => showModal(record)}
           >
@@ -283,6 +281,7 @@ const CustomerTable = () => {
             size="large"
             color="danger"
             variant="text"
+            style={{ marginLeft: 5 }}
             onClick={() => handleDelete(record.id)}
           >
             <DeleteOutlined style={{ fontSize: '20px' }} />
@@ -312,7 +311,7 @@ const CustomerTable = () => {
         </Col> */}
         <Col>
           <Button color="primary" variant="text" size="large" onClick={() => showModal(null)}>
-            <FileAddOutlined></FileAddOutlined>
+            <FileAddOutlined style={{ fontSize: '20px' }}></FileAddOutlined>
           </Button>
         </Col>
       </Row>

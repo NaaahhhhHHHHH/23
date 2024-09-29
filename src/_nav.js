@@ -337,6 +337,11 @@ const _nav = [
         name: 'Service',
         to: '/Service/Service',
       },
+      {
+        component: CNavItem,
+        name: 'Form',
+        to: '/Service/Form',
+      },
     ],
   },
   {

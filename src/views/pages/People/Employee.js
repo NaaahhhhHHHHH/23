@@ -241,19 +241,19 @@ const EmployeeTable = () => {
           <Button
             color="primary"
             size="large"
-            style={{ marginLeft: 5 }}
             variant="text"
             onClick={() => showModal(record)}
           >
-            <EditOutlined />
+            <EditOutlined style={{ fontSize: '20px' }}/>
           </Button>
           <Button
             size="large"
             color="danger"
+            style={{ marginLeft: 5 }}
             variant="text"
             onClick={() => handleDelete(record.id)}
           >
-            <DeleteOutlined />
+            <DeleteOutlined style={{ fontSize: '20px' }}/>
           </Button>
         </>
       ),
@@ -280,7 +280,7 @@ const EmployeeTable = () => {
         </Col> */}
         <Col>
           <Button color="primary" variant="text" size="large" onClick={() => showModal(null)}>
-            <FileAddOutlined></FileAddOutlined>
+            <FileAddOutlined style={{ fontSize: '20px' }}></FileAddOutlined>
           </Button>
         </Col>
       </Row>

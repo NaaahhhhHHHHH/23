@@ -3,7 +3,7 @@ import React from 'react'
 const Employee = React.lazy(() => import('./views/pages/People/Employee'))
 const Owner = React.lazy(() => import('./views/pages/People/Owner'))
 const Customer = React.lazy(() => import('./views/pages/People/Customer'))
-
+const Form = React.lazy(() => import('./views/pages/Service/Form'))
 const Service = React.lazy(() => import('./views/pages/Service/Service'))
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
@@ -107,6 +107,7 @@ const routes = [
   { path: '/People/Owner', name: 'Owner', element: Owner },
   { path: '/People/Customer', name: 'Customer', element: Customer },
   { path: '/Service/Service', name: 'Service', element: Service },
+  { path: '/Service/Form', name: 'Form', element: Form },
 ]
 
 export default routes

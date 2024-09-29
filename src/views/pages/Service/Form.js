@@ -13,6 +13,7 @@ import {
   Checkbox,
   InputNumber,
   Divider,
+  Radio,
   Space,
   Card,
 } from 'antd'
@@ -34,11 +35,13 @@ const { TextArea } = Input
 
 const ServiceTable = () => {
   const [data, setData] = useState([])
-  //const [searchText, setSearchText] = useState('')
+  const [customerData, setCustomerData] = useState([])
+  const [serviceData, setServiceData] = useState([])
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [serviceName, setServiceName] = useState('')
   const [isViewModalVisible, setIsViewModalVisible] = useState(false)
   const [currentService, setCurrentService] = useState(null)
+  const [currentForm, setCurrentForm] = useState(null)
   const [form] = Form.useForm()
   const [currentStep, setCurrentStep] = useState(0)
   const [step1Values, setStep1Values] = useState({})
@@ -169,7 +172,7 @@ const ServiceTable = () => {
   })
 
   useEffect(() => {
-    loadServices()
+    loadForms()
   }, [])
 
   const handleError = (error) => {
@@ -183,10 +186,23 @@ const ServiceTable = () => {
     }
   }
 
-  const loadServices = async () => {
+  const loadForms = async () => {
     try {
-      const response = await getData('service')
-      setData(response.data)
+      const response1 = await getData('service')
+      const response2 = await getData('form')
+      const response3 = await getData('customer')
+      let formList = response2.data
+      let serviceList = response1.data
+      let customerList = response3.data
+      formList.forEach(f => {
+        f.cname = customerList.find(c => f.cid == c.id).name
+        f.sname = serviceList.find(s => f.sid == s.id).name
+      })
+      setData(formList)
+      let serviceOption = serviceList.map(r => ({"label": r.name, "value": r.id, "data": r.formData}))
+      let customerOption = customerList.map(r => ({"label": r.name, "value": r.id}))
+      setServiceData(serviceOption)
+      setCustomerData(customerOption)
     } catch (error) {
       handleError(error)
     }
@@ -200,21 +216,22 @@ const ServiceTable = () => {
   //     item.name.toLowerCase().includes(searchText.toLowerCase()),
   //   )
 
-  const showModal = (service) => {
-    setCurrentService(service)
-    form.setFieldsValue(service)
-    if (service) {
-      setFormDataArray(
-        service.formData || [
-          {
-            type: 'input',
-            label: '',
-            required: false,
-            fieldname: `field_1`,
-          },
-        ],
-      ) // Load existing formData
-    }
+  const showModal = (CForm) => {
+    
+    setCurrentForm(CForm)
+    form.setFieldsValue(CForm)
+    // if (service) {
+    //   setFormDataArray(
+    //     service.formData || [
+    //       {
+    //         type: 'input',
+    //         label: '',
+    //         required: false,
+    //         fieldname: `field_1`,
+    //       },
+    //     ],
+    //   ) // Load existing formData
+    // }
     setIsModalVisible(true)
     setCurrentStep(0)
   }
@@ -231,7 +248,7 @@ const ServiceTable = () => {
   const handleDelete = async (id) => {
     try {
       let res = await deleteData('service', id)
-      loadServices()
+      loadForms()
       message.success(res.data.message)
     } catch (error) {
       handleError(error)
@@ -252,7 +269,7 @@ const ServiceTable = () => {
       let res = currentService
         ? await updateData('service', currentService.id, formData)
         : await createData('service', formData)
-      loadServices()
+      loadForms()
       handleCloseModal()
       message.success(res.data.message)
     } catch (error) {
@@ -285,79 +302,40 @@ const ServiceTable = () => {
     setCurrentStep(currentStep - 1)
   }
 
-  const handleAddField = () => {
-    const newData = [
-      ...formDataArray,
-      { type: 'input', label: '', required: false, fieldname: `field_${formDataArray.length + 1}` },
-    ]
-    setFormDataArray(newData)
-    form.setFieldsValue({ formData: newData })
-  }
-  const handleAddOption = (index, field) => {
-    const newData = [...formDataArray]
-    newData[index][field].push('')
-    setFormDataArray(newData)
-    form.setFieldsValue({ formData: newData })
-  }
-
-  const handleDeleteOption = (index, field, indexOption) => {
-    const newData = [...formDataArray]
-    newData[index][field].splice(indexOption, 1)
-    setFormDataArray(newData)
-    form.setFieldsValue({ formData: newData })
-  }
-
-  const handleRemoveField = (index) => {
-    const newData = formDataArray.filter((_, i) => i !== index)
-    setFormDataArray(newData)
-    form.setFieldsValue({ formData: newData })
-  }
-
-  const handleFieldChange = (index, field, value) => {
-    const newData = [...formDataArray]
-    newData[index][field] = value
-    if (field == 'type' && (value == 'select' || value == 'radio' || value == 'checkbox')) {
-      newData[index].option = ['', '']
-    }
-    setFormDataArray(newData)
-    form.setFieldsValue({ formData: newData })
-    form.validateFields()
-  }
-
-  const handleFieldOptionChange = (index, field, indexOption, value) => {
-    const newData = [...formDataArray]
-    newData[index][field][indexOption] = value
-    setFormDataArray(newData)
-    form.setFieldsValue({ formData: newData })
+  const handleChangeService = (value) => {
+    let findForm = serviceData.find(r => r.value == value)
+    let formD = findForm.data ? findForm.data : []
+    console.log(formD)
+    setFormDataArray(formD)
   }
 
   const columns = [
     {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-      ...getColumnSearchProps('name'),
-      width: 300,
-      sorter: (a, b) => a.name.localeCompare(b.name),
+      title: 'Customer Name',
+      dataIndex: 'cname',
+      key: 'cname',
+      ...getColumnSearchProps('cname'),
+      width: 350,
+      sorter: (a, b) => a.cname.localeCompare(b.cname),
       ellipsis: true,
     },
     {
-      title: 'Price',
-      dataIndex: 'price',
-      key: 'price',
-      width: 200,
-      render: (price) => price.toLocaleString("en-US", {style:"currency", currency:"USD"}),
-      sorter: (a, b) => a.price - b.price,
+      title: 'Service Name',
+      dataIndex: 'sname',
+      key: 'sname',
+      width: 350,
+      //render: (price) => price.toLocaleString("en-US", {style:"currency", currency:"USD"}),
+      sorter: (a, b) => a.sname.localeCompare(b.sname),
       ellipsis: true,
     },
-    {
-      title: 'Description',
-      ...getColumnSearchProps('description'),
-      width: 400,
-      dataIndex: 'description',
-      key: 'description',
-      ellipsis: true,
-    },
+    // {
+    //   title: 'Description',
+    //   ...getColumnSearchProps('description'),
+    //   width: 400,
+    //   dataIndex: 'description',
+    //   key: 'description',
+    //   ellipsis: true,
+    // },
     {
       title: 'Action',
       key: 'action',
@@ -402,6 +380,18 @@ const ServiceTable = () => {
     </div>
   )
 
+  // const modalTitle2 = (
+  //   <div style={{ textAlign: 'center', width: '100%' }}>
+  //     {`${title} Form`}
+  //   </div>
+  // )
+
+  const formItemLabelStyle = {
+    whiteSpace: 'pre-wrap',
+    wordWrap: 'break-word',
+    maxWidth: '95%',
+  };
+
   return (
     <>
       <Row style={{ display: 'block', marginBottom: 5, textAlign: 'right' }}>
@@ -436,7 +426,7 @@ const ServiceTable = () => {
         title={modalTitle}
         open={isModalVisible}
         style={{ top: 120, maxHeight: '85vh', overflowY: 'auto', overflowX: 'hidden' }}
-        width={1000}
+        width={700}
         onCancel={handleCloseModal}
         footer={null}
       >
@@ -447,9 +437,8 @@ const ServiceTable = () => {
 
         <Form
           form={form}
+          layout="vertical"
           onFinish={handleAddOrUpdate}
-          labelCol={{ span: 6 }}
-          wrapperCol={{ span: 17 }}
           style={{
             marginTop: 20,
             maxWidth: 'none',
@@ -460,195 +449,133 @@ const ServiceTable = () => {
             <>
               {/* Step 1: Name, Price, Description */}
               <Form.Item
-                name="name"
-                label="Name"
-                rules={[{ required: true, message: 'Please input service name!' }]}
+                name="cname"
+                label="Customer"
+                rules={[{ required: true, message: 'Please choose customer' }]}
               >
-                <Input />
+                <Select
+                  showSearch
+                  placeholder="Select Customer"
+                  optionFilterProp="label"
+                  // onChange={}
+                  options= {customerData}/>
               </Form.Item>
               <Form.Item
-                placeholder="$"
-                name="price"
-                label="Price"
-                rules={[{ required: true, message: 'Please input service price!' }]}
+                //placeholder="$"
+                name="sname"
+                label="Service"
+                rules={[{ required: true, message: 'Please choose service' }]}
               >
-                <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
+                <Select
+                  showSearch
+                  placeholder="Select Service"
+                  optionFilterProp="label"
+                  onChange={(value) => handleChangeService(value)}
+                  options= {serviceData}/>
               </Form.Item>
-              <Form.Item
+              {/* <Form.Item
                 name="description"
                 label="Description"
                 rules={[{ required: true, message: 'Please input service description!' }]}
               >
                 <TextArea rows={4} />
-              </Form.Item>
+              </Form.Item> */}
             </>
           )}
 
           {currentStep === 1 && (
             <>
-              {/* Step 2: Form Data */}
-              {formDataArray.map((field, index) => (
-                <Card
+              {formDataArray.map((item, index) => ({
+        name: item.fieldname,
+        label: item.label,
+        // initialValue: item.initvalue,
+        rules: item.required ? [{ required: true, message: `${item.fieldname} is required` }] : [],
+        type: item.type,
+        options: item.option || [],
+      })).map((field, index) => {
+          switch (field.type) {
+            case 'input':
+              return (
+                <Form.Item
                   key={index}
-                  size="small"
-                  title={`Field ${index + 1}`}
-                  marginLeft={70}
-                  style={{ marginBottom: 15 }}
-                  bodyStyle={{ marginLeft: 50 }}
-                  extra={
-                    <CloseOutlined
-                      onClick={() => {
-                        handleRemoveField(index)
-                      }}
-                    />
-                  }
+                  label={<span style={formItemLabelStyle}>{field.label}</span>}
+                  name={field.name}
+                  rules={field.rules}
+                  //   initialValue={field.initialValue}
                 >
-                  <Row gutter={10}>
-                    <Col span={7}>
-                      <Form.Item
-                        label="Type"
-                        name={['formData', index, 'type']}
-                        style={{ marginBottom: 5, marginLeft: 34 }}
-                        labelCol={{ span: 6 }}
-                        // initialValue={'input'}
-                        rules={[{ required: true, message: 'Please input field type' }]}
-                      >
-                        <Select onChange={(value) => handleFieldChange(index, 'type', value)}>
-                          <Select.Option value="input">Input</Select.Option>
-                          <Select.Option value="textarea">TextArea</Select.Option>
-                          <Select.Option value="select">Select</Select.Option>
-                          <Select.Option value="radio">Radio</Select.Option>
-                          <Select.Option value="checkbox">Checkbox</Select.Option>
-                        </Select>
-                      </Form.Item>
-                    </Col>
-                    <Col span={7}>
-                      <Form.Item
-                        label="Name"
-                        name={['formData', index, 'fieldname']}
-                        style={{ marginBottom: 5 }}
-                        // initialValue={`field_${index + 1}`}
-                        rules={[
-                          { required: true, message: 'Please input field name' },
-                          {
-                            validator: async (_, fieldname) => {
-                              if (formDataArray.filter(r => r.fieldname == fieldname).length >= 2) {
-                                return Promise.reject(new Error("Field name is duplicated"))
-                              }
-                            },
-                          },
-                        ]}
-                      >
-                        <Input
-                          onChange={(e) => handleFieldChange(index, 'fieldname', e.target.value)}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={7}>
-                      <Form.Item
-                        label="Required"
-                        labelCol={{ span: 7 }}
-                        wrapperCol={{ span: 5 }}
-                        style={{ marginBottom: 5 }}
-                        name={['formData', index, 'required']}
-                      >
-                        <Checkbox
-                          checked={field.required}
-                          onChange={(e) => handleFieldChange(index, 'required', e.target.checked)}
-                        ></Checkbox>
-                      </Form.Item>
-                    </Col>
-
-                    {/* <Col span={2}>
-                      <Button type="primary" onClick={() => handleRemoveField(index)} danger>
-                        Delete
-                      </Button>
-                    </Col> */}
-                  </Row>
-                  <Row gutter={10}>
-                    <Col span={20}>
-                      <Form.Item
-                        labelCol={{ span: 2 }}
-                        wrapperCol={{ span: 28 }}
-                        label="Label"
-                        name={['formData', index, 'label']}
-                        style={{ marginBottom: 5, marginLeft: 30 }}
-                        // initialValue={''}
-                        rules={[{ required: true, message: 'Please input field label' }]}
-                      >
-                        <TextArea
-                          onChange={(e) => handleFieldChange(index, 'label', e.target.value)}
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                  {(field.type === 'select' ||
-                    field.type === 'radio' ||
-                    field.type === 'checkbox') && (
-                    <>
-                      <Row gutter={10} style={{ left: -15 }}>
-                        {field.option.map((Option, indexOption) => (
-                          <>
-                            <Col span={10}>
-                              <Form.Item
-                                labelCol={{ span: 6 }}
-                                wrapperCol={{ span: 30 }}
-                                label={`Option ${indexOption + 1}`}
-                                style={{ marginBottom: 5 }}
-                                name={['formData', index, 'option', indexOption]}
-                                initialValue={Option}
-                                rules={[{ required: true, message: 'Please input option' }]}
-                              >
-                                <Input.TextArea
-                                  rows={1}
-                                  onChange={(e) =>
-                                    handleFieldOptionChange(
-                                      index,
-                                      'option',
-                                      indexOption,
-                                      e.target.value,
-                                    )
-                                  }
-                                />
-                              </Form.Item>
-                            </Col>
-                            {field.option.length > 1 && (
-                              <>
-                                <Button
-                                  color="danger"
-                                  variant="link"
-                                  //   icon={<DeleteOutlined />}
-                                  style={{ padding: '1px 13px 1px 1px' }}
-                                  onClick={(e) => handleDeleteOption(index, 'option', indexOption)}
-                                >
-                                  x
-                                </Button>
-                              </>
-                            )}
-                          </>
-                        ))}
-
-                        <Button
-                          color="primary"
-                          variant="dashed"
-                          onClick={(e) => handleAddOption(index, 'option')}
-                          style={{ marginLeft: '5px' }}
-                        >
-                          +
-                        </Button>
-                      </Row>
-                    </>
-                  )}
-                </Card>
-              ))}
-              <Button
-                variant="dashed"
-                color="primary"
-                onClick={handleAddField}
-                style={{ width: '100%' }}
-              >
-                + Add Field
-              </Button>
+                  <Input placeholder={`Enter ${field.name}`} />
+                </Form.Item>
+              )
+            case 'textarea':
+              return (
+                <Form.Item
+                  key={index}
+                  label={<span style={formItemLabelStyle}>{field.label}</span>}
+                  name={field.name}
+                  rules={field.rules}
+                  //   initialValue={field.initialValue}
+                >
+                  <Input.TextArea placeholder={`Enter ${field.name}`} />
+                </Form.Item>
+              )
+            case 'select':
+              return (
+                <Form.Item
+                  key={index}
+                  label={<span style={formItemLabelStyle}>{field.label}</span>}
+                  name={field.name}
+                  rules={field.rules}
+                  initialValue={field.initialValue}
+                >
+                  <Select placeholder={`Select ${field.name}`}>
+                    {field.options.map((option, idx) => (
+                      <Select.Option key={idx} value={idx}>
+                        {option}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              )
+            case 'radio':
+              return (
+                <Form.Item
+                  key={index}
+                  label={<span style={formItemLabelStyle}>{field.label}</span>}
+                  name={field.name}
+                  rules={field.rules}
+                  //   initialValue={field.initialValue}
+                >
+                  <Radio.Group style={{display: "inline-grid"}}>
+                    {field.options.map((option, idx) => (
+                      <Radio key={idx} value={idx} style={ formItemLabelStyle }>
+                        {option}
+                      </Radio>
+                    ))}
+                  </Radio.Group>
+                </Form.Item>
+              )
+            case 'checkbox':
+              return (
+                <Form.Item
+                  key={index}
+                  label={<span style={formItemLabelStyle}>{field.label}</span>}
+                  name={field.name}
+                  rules={field.rules}
+                  //   initialValue={field.initialValue}
+                >
+                  <Checkbox.Group dir style={{display: "inline-grid"}}>
+                    {field.options.map((option, idx) => (
+                      <Checkbox key={idx} value={idx} style={formItemLabelStyle}>
+                        {option}
+                      </Checkbox>
+                    ))}
+                  </Checkbox.Group>
+                </Form.Item>
+              )
+            default:
+              return null
+          }
+        })}
             </>
           )}
 
