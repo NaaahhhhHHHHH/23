@@ -31,6 +31,7 @@ import {
 import { updateData, createData, deleteData, getData } from '../../../api'
 import Highlighter from 'react-highlight-words'
 import DynamicFormModal from './ModalForm'
+import AssignFormModal from './ModalAssign'
 
 const { Step } = Steps
 const { TextArea } = Input
@@ -38,15 +39,21 @@ const { TextArea } = Input
 const ServiceTable = () => {
   const [data, setData] = useState([])
   const [customerData, setCustomerData] = useState([])
+  const [employeeData, setEmployeeData] = useState([])
   const [serviceData, setServiceData] = useState([])
+  const [formData, setformData] = useState([])
+  const [formDataAssign, setformDataAssign] = useState(null)
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [serviceName, setServiceName] = useState('')
   const [isViewModalVisible, setIsViewModalVisible] = useState(false)
+  const [isAssignModalVisible, setIsAssignModalVisible] = useState(false)
   // const [currentService, setCurrentService] = useState(null)
   const [currentForm, setCurrentForm] = useState(null)
+  const [currentJob, setCurrentJob] = useState(null)
   const [form] = Form.useForm()
+  const [formAssign] = Form.useForm()
   const [currentStep, setCurrentStep] = useState(0)
-  const [step1Values, setStep1Values] = useState({})
+  // const [step1Values, setStep1Values] = useState({})
   const [formDataArray, setFormDataArray] = useState([]) // Default one field
   const navigate = useNavigate()
 
@@ -56,18 +63,22 @@ const ServiceTable = () => {
   const statusList = [
     {
       value: 'Pending',
+      label: 'Pending',
       color: 'yellow',
     },
     {
       value: 'Running',
+      label: 'Running',
       color: 'geekblue',
     },
     {
       value: 'Complete',
+      label: 'Complete',
       color: 'green',
     },
     {
       value: 'Maintance',
+      label: 'Maintance',
       color: 'green',
     },
   ]
@@ -76,14 +87,58 @@ const ServiceTable = () => {
   //   setIsViewModalVisible(true)
   // }
 
-  // const handleCloseViewModal = () => {
-  //   setIsViewModalVisible(false)
-  // }
+  const showViewModal = (CJob) => {
+    // setCurrentForm(Cform)
+    // setServiceName(service.name)
+    // if (Cform) {
+    //   setFormDataArray(form.data) // Load existing formData
+    // }
+    let findService = serviceData.find(r => r.value == CJob.sid)
+    let formValue = formDataArray.find(r => r.id == CJob.formid)
+    setformData(formValue.data)
+    setServiceName(findService.label)
+    setIsViewModalVisible(true)
+  }
 
-  // const handleSubmitViewModal = (values) => {
-  //   console.log('Submitted Values:', values)
-  //   handleCloseViewModal()
-  // }
+  const handleCloseViewModal = () => {
+    setIsViewModalVisible(false)
+  }
+
+  const handleSubmitViewModal = (values) => {
+    console.log('Submitted Values:', values)
+    handleCloseViewModal()
+  }
+
+  const showAssignModal = (CJob) => {
+    // setCurrentForm(Cform)
+    // setServiceName(service.name)
+    // if (Cform) {
+    //   setFormDataArray(form.data) // Load existing formData
+    // }
+    // let findService = serviceData.find(r => r.value == CJob.sid)
+    // let formValue = formDataArray.find(r => r.id == CJob.formid)
+    setformDataAssign({
+      eid: null,
+      status: 'Waitting',
+      expire: 1,
+      reassignment: false,
+      payment: {
+        method: "1 Time",
+        budget: null
+      }
+    })
+    // setServiceName(findService.label)
+    setIsAssignModalVisible(true)
+  }
+
+  const handleCloseAssignModal = () => {
+    setIsAssignModalVisible(false)
+  }
+
+  const handleSubmitAssignModal = (values) => {
+    console.log('Submitted Values:', values)
+    handleCloseAssignModal()
+  }
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm()
@@ -190,7 +245,7 @@ const ServiceTable = () => {
   })
 
   useEffect(() => {
-    loadForms()
+    loadJobs()
   }, [])
 
   const handleError = (error) => {
@@ -204,17 +259,19 @@ const ServiceTable = () => {
     }
   }
 
-  const loadForms = async () => {
+  const loadJobs = async () => {
     try {
       const response0 = await getData('job')
       const response1 = await getData('service')
       const response2 = await getData('form')
       const response3 = await getData('customer')
+      const response4 = await getData('employee')
 
       let jobList = response0.data
       let formList = response2.data
       let serviceList = response1.data
       let customerList = response3.data
+      let employeeList = response4.data
       jobList.forEach((j) => {
         j.cname = customerList.find((c) => j.cid == c.id).name
         j.sname = serviceList.find((s) => j.sid == s.id).name
@@ -222,8 +279,12 @@ const ServiceTable = () => {
       setData(jobList)
       let serviceOption = serviceList.map((r) => ({ label: r.name, value: r.id, data: r.formData }))
       let customerOption = customerList.map((r) => ({ label: r.name, value: r.id }))
+      let employeeOption = employeeList.map((r) => ({ label: r.name, value: r.id }))
       setServiceData(serviceOption)
       setCustomerData(customerOption)
+      setEmployeeData(employeeOption)
+      setFormDataArray(formList)
+      set
     } catch (error) {
       handleError(error)
     }
@@ -237,12 +298,12 @@ const ServiceTable = () => {
   //     item.name.toLowerCase().includes(searchText.toLowerCase()),
   //   )
 
-  const showModal = (CForm) => {
-    setCurrentForm(CForm)
-    form.setFieldsValue(CForm)
-    if (CForm) {
-      setFormDataArray(CForm.data)
-    }
+  const showModal = (CJob) => {
+    setCurrentJob(CJob)
+    form.setFieldsValue(CJob)
+    // if (CJob) {
+    //   setFormDataArray(CJob.data)
+    // }
     // if (service) {
     //   setFormDataArray(
     //     service.formData || [
@@ -259,44 +320,32 @@ const ServiceTable = () => {
     setCurrentStep(0)
   }
 
-  // const showViewModal = (Cform) => {
-  //   setCurrentForm(Cform)
-  //   // setServiceName(service.name)
-  //   if (Cform) {
-  //     setFormDataArray(form.data) // Load existing formData
-  //   }
-  //   // setIsViewModalVisible(true)
-  // }
-
   const handleDelete = async (id) => {
     try {
-      let res = await deleteData('form', id)
-      loadForms()
+      let res = await deleteData('job', id)
+      loadJobs()
       message.success(res.data.message)
     } catch (error) {
       handleError(error)
     }
   }
 
-  const validateFormDataArray = () => {
-    for (let field of formDataArray) {
-      if (!field.label) {
-      }
-    }
-  }
-
   const handleAddOrUpdate = async (values) => {
     try {
-      let valid = await form.validateFields()
+      // let valid = await form.validateFields()
+      // let formValue = form.getFieldsValue()
+      // formValue.data.forEach((r, index) => {
+      //   formValue.data[index] = { ...formDataArray[index], ...r }
+      // })
+      // let formData = { ...step1Values, data: formValue.data } // Add formDataArray to form values
       let formValue = form.getFieldsValue()
-      formValue.data.forEach((r, index) => {
-        formValue.data[index] = { ...formDataArray[index], ...r }
-      })
-      let formData = { ...step1Values, data: formValue.data } // Add formDataArray to form values
-      let res = currentForm
-        ? await updateData('form', currentForm.id, formData)
-        : await createData('form', formData)
-      loadForms()
+      let formData = {...currentJob}
+      formData.status = formValue.status ? formValue.status : formData.status
+      formData.budget = formValue.budget ? formValue.budget : formData.budget
+      let res = currentJob
+        ? await updateData('job', currentJob.id, formData)
+        : await createData('job', formData)
+      loadJobs()
       handleCloseModal()
       message.success(res.data.message)
     } catch (error) {
@@ -306,61 +355,61 @@ const ServiceTable = () => {
 
   const handleCloseModal = () => {
     setIsModalVisible(false)
-    setCurrentForm(null)
-    setFormDataArray([])
+    setCurrentJob(null)
     form.resetFields()
   }
 
-  const handleNextStep = () => {
-    form
-      .validateFields()
-      .then(() => {
-        setCurrentStep(currentStep + 1)
-        const values = form.getFieldsValue()
-        setStep1Values(values)
-        console.log('Step 1 Values:', values)
-      })
-      .catch((info) => {
-        console.log('Validation Failed:', info)
-      })
-  }
+  // const handleNextStep = () => {
+  //   form
+  //     .validateFields()
+  //     .then(() => {
+  //       setCurrentStep(currentStep + 1)
+  //       const values = form.getFieldsValue()
+  //       setStep1Values(values)
+  //       console.log('Step 1 Values:', values)
+  //     })
+  //     .catch((info) => {
+  //       console.log('Validation Failed:', info)
+  //     })
+  // }
 
-  const handlePreviousStep = () => {
-    setCurrentStep(currentStep - 1)
-  }
+  // const handlePreviousStep = () => {
+  //   setCurrentStep(currentStep - 1)
+  // }
 
-  const handleChangeService = (value) => {
-    if (!currentForm || value != currentForm.sid) {
-      let findForm = serviceData.find((r) => r.value == value)
-      let formD = findForm.data ? findForm.data : []
-      setFormDataArray(formD)
-      // let fData = { ...currentForm }
-      // fData.data = formD
-      form.setFieldValue('data', formD)
-      console.log(formD)
-    } else {
-      setFormDataArray(currentForm.data)
-      form.setFieldValue('data', currentForm.data)
-    }
-  }
+  // const handleChangeService = (value) => {
+  //   if (!currentForm || value != currentForm.sid) {
+  //     let findForm = serviceData.find((r) => r.value == value)
+  //     let formD = findForm.data ? findForm.data : []
+  //     setFormDataArray(formD)
+  //     // let fData = { ...currentForm }
+  //     // fData.data = formD
+  //     form.setFieldValue('data', formD)
+  //     console.log(formD)
+  //   } else {
+  //     setFormDataArray(currentForm.data)
+  //     form.setFieldValue('data', currentForm.data)
+  //   }
+  // }
 
   const columns = [
-    // {
-    //   title: 'Customer Name',
-    //   dataIndex: 'cname',
-    //   key: 'cname',
-    //   ...getColumnSearchProps('cname'),
-    //   width: 250,
-    //   sorter: (a, b) => a.cname.localeCompare(b.cname),
-    //   ellipsis: true,
-    // },
     {
       title: 'Service Name',
       dataIndex: 'sname',
       key: 'sname',
-      width: 250,
+      width: 200,
+      ...getColumnSearchProps('sname'),
       //render: (price) => price.toLocaleString("en-US", {style:"currency", currency:"USD"}),
       sorter: (a, b) => a.sname.localeCompare(b.sname),
+      ellipsis: true,
+    },
+    {
+      title: 'Customer Name',
+      dataIndex: 'cname',
+      key: 'cname',
+      ...getColumnSearchProps('cname'),
+      width: 200,
+      sorter: (a, b) => a.cname.localeCompare(b.cname),
       ellipsis: true,
     },
     {
@@ -368,6 +417,7 @@ const ServiceTable = () => {
       dataIndex: 'budget',
       key: 'budget',
       width: 200,
+      ...getColumnSearchProps('budget'),
       render: (budget) => budget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
       sorter: (a, b) => a.budget - b.budget,
       ellipsis: true,
@@ -376,7 +426,7 @@ const ServiceTable = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      width: 150,
+      width: 100,
       render: (status) => (
         <>
           <Tag
@@ -450,7 +500,7 @@ const ServiceTable = () => {
             color="primary"
             size="large"
             variant="text"
-            onClick={() => showAsignModal(record.id)}
+            onClick={() => showAssignModal(record)}
             style={{ marginLeft: 5 }}
           >
             <UserAddOutlined style={{ fontSize: '20px' }} />
@@ -471,15 +521,9 @@ const ServiceTable = () => {
 
   const modalTitle = (
     <div style={{ textAlign: 'center', width: '100%' }}>
-      {currentForm ? 'Edit Form' : 'Add Form'}
+      {currentJob ? 'Edit Job' : 'Add Job'}
     </div>
   )
-
-  // const modalTitle2 = (
-  //   <div style={{ textAlign: 'center', width: '100%' }}>
-  //     {`${title} Form`}
-  //   </div>
-  // )
 
   const formItemLabelStyle = {
     whiteSpace: 'pre-wrap',
@@ -498,25 +542,33 @@ const ServiceTable = () => {
             style={{ width: '100%' }}
           />
         </Col> */}
-        <Col>
+        {/* <Col>
           <Button color="primary" variant="text" size="large" onClick={() => showModal(null)}>
             <FileAddOutlined style={{ fontSize: '20px' }}></FileAddOutlined>
           </Button>
-        </Col>
+        </Col> */}
       </Row>
       <Table
         columns={columns}
         dataSource={data}
         pagination={{ pageSize: 10 }}
-        locale={{ emptyText: 'No services found' }}
+        locale={{ emptyText: 'No jobs found' }}
       />
-      {/* <DynamicFormModal
+      <DynamicFormModal
         title={serviceName}
         visible={isViewModalVisible}
         onClose={handleCloseViewModal}
-        formDataArray={formDataArray}
+        formDataArray={formData}
         onSubmit={handleSubmitViewModal}
-      /> */}
+      />
+      <AssignFormModal
+        title={"Assignment"}
+        visible={isAssignModalVisible}
+        onClose={handleCloseAssignModal}
+        formDataArray={formDataAssign}
+        employeeOptions={employeeData}
+        onSubmit={handleSubmitAssignModal}
+      />
       <Modal
         title={modalTitle}
         open={isModalVisible}
@@ -525,11 +577,6 @@ const ServiceTable = () => {
         onCancel={handleCloseModal}
         footer={null}
       >
-        <Steps current={currentStep}>
-          <Step title="Set Up Form" />
-          <Step title="Form Data" />
-        </Steps>
-
         <Form
           form={form}
           layout="vertical"
@@ -540,162 +587,38 @@ const ServiceTable = () => {
           }}
           scrollToFirstError={true}
         >
-          {currentStep === 0 && (
-            <>
-              {/* Step 1: Name, Price, Description */}
               <Form.Item
-                name="cid"
-                label="Customer"
-                rules={[{ required: true, message: 'Please choose customer' }]}
+                name="budget"
+                label="Budget"
+                rules={[{ required: true, message: 'Please input budget' }]}
               >
-                <Select
+                {/* <Select
                   showSearch
                   placeholder="Select Customer"
                   optionFilterProp="label"
                   // onChange={}
                   options={customerData}
-                />
+                /> */}
+                <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
               </Form.Item>
               <Form.Item
                 //placeholder="$"
-                name="sid"
-                label="Service"
+                name="status"
+                label="Status"
                 rules={[{ required: true, message: 'Please choose service' }]}
               >
                 <Select
                   showSearch
-                  placeholder="Select Service"
+                  placeholder="Select status"
                   optionFilterProp="label"
-                  onChange={(value) => handleChangeService(value)}
-                  options={serviceData}
+                  // onChange={(value) => handleChangeService(value)}
+                  options={statusList}
                 />
               </Form.Item>
-              {/* <Form.Item
-                name="description"
-                label="Description"
-                rules={[{ required: true, message: 'Please input service description!' }]}
-              >
-                <TextArea rows={4} />
-              </Form.Item> */}
-            </>
-          )}
-
-          {currentStep === 1 && (
-            <>
-              {formDataArray
-                .map((item, index) => ({
-                  name: item.fieldname,
-                  label: item.label,
-                  // initialValue: item.initvalue,
-                  rules: item.required
-                    ? [{ required: true, message: `${item.fieldname} is required` }]
-                    : [],
-                  type: item.type,
-                  options: item.option || [],
-                }))
-                .map((field, index) => {
-                  switch (field.type) {
-                    case 'input':
-                      return (
-                        <Form.Item
-                          key={index}
-                          label={<span style={formItemLabelStyle}>{field.label}</span>}
-                          name={['data', index, 'value']}
-                          rules={field.rules}
-                          //   initialValue={field.initialValue}
-                        >
-                          <Input placeholder={`Enter ${field.name}`} />
-                        </Form.Item>
-                      )
-                    case 'textarea':
-                      return (
-                        <Form.Item
-                          key={index}
-                          label={<span style={formItemLabelStyle}>{field.label}</span>}
-                          name={['data', index, 'value']}
-                          rules={field.rules}
-                          //   initialValue={field.initialValue}
-                        >
-                          <Input.TextArea placeholder={`Enter ${field.name}`} />
-                        </Form.Item>
-                      )
-                    case 'select':
-                      return (
-                        <Form.Item
-                          key={index}
-                          label={<span style={formItemLabelStyle}>{field.label}</span>}
-                          name={['data', index, 'value']}
-                          rules={field.rules}
-                          initialValue={field.initialValue}
-                        >
-                          <Select placeholder={`Select ${field.name}`}>
-                            {field.options.map((option, idx) => (
-                              <Select.Option key={idx} value={idx}>
-                                {option}
-                              </Select.Option>
-                            ))}
-                          </Select>
-                        </Form.Item>
-                      )
-                    case 'radio':
-                      return (
-                        <Form.Item
-                          key={index}
-                          label={<span style={formItemLabelStyle}>{field.label}</span>}
-                          name={['data', index, 'value']}
-                          rules={field.rules}
-                          //   initialValue={field.initialValue}
-                        >
-                          <Radio.Group style={{ display: 'inline-grid' }}>
-                            {field.options.map((option, idx) => (
-                              <Radio key={idx} value={idx} style={formItemLabelStyle}>
-                                {option}
-                              </Radio>
-                            ))}
-                          </Radio.Group>
-                        </Form.Item>
-                      )
-                    case 'checkbox':
-                      return (
-                        <Form.Item
-                          key={index}
-                          label={<span style={formItemLabelStyle}>{field.label}</span>}
-                          name={['data', index, 'value']}
-                          rules={field.rules}
-                          //   initialValue={field.initialValue}
-                        >
-                          <Checkbox.Group dir style={{ display: 'inline-grid' }}>
-                            {field.options.map((option, idx) => (
-                              <Checkbox key={idx} value={idx} style={formItemLabelStyle}>
-                                {option}
-                              </Checkbox>
-                            ))}
-                          </Checkbox.Group>
-                        </Form.Item>
-                      )
-                    default:
-                      return null
-                  }
-                })}
-            </>
-          )}
-
           <div style={{ textAlign: 'center', marginTop: 20 }}>
-            {currentStep > 0 && (
-              <Button style={{ marginRight: 40 }} onClick={handlePreviousStep}>
-                Previous
-              </Button>
-            )}
-            {currentStep < 1 && (
-              <Button type="primary" onClick={handleNextStep}>
-                Next
-              </Button>
-            )}
-            {currentStep === 1 && (
               <Button type="primary" htmlType="submit">
-                {currentForm ? 'Update' : 'Add'}
+                {currentJob ? 'Update' : 'Add'}
               </Button>
-            )}
           </div>
         </Form>
       </Modal>

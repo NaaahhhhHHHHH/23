@@ -15,6 +15,7 @@ const DynamicFormModal = ({ title, visible, onClose, formDataArray, onSubmit }) 
         rules: item.required ? [{ required: true, message: `${item.fieldname} is required` }] : [],
         type: item.type,
         options: item.option || [],
+        value: item.value,
       }))
       setFields(initialFields)
       form.resetFields() // Clear the form on modal open
@@ -65,9 +66,9 @@ const DynamicFormModal = ({ title, visible, onClose, formDataArray, onSubmit }) 
                   label={<span style={formItemLabelStyle}>{field.label}</span>}
                   name={field.name}
                   rules={field.rules}
-                  //   initialValue={field.initialValue}
+                  initialValue={field.value}
                 >
-                  <Input placeholder={`Enter ${field.name}`} />
+                  <Input disabled placeholder={`Enter ${field.name}`} />
                 </Form.Item>
               )
             case 'textarea':
@@ -77,9 +78,9 @@ const DynamicFormModal = ({ title, visible, onClose, formDataArray, onSubmit }) 
                   label={<span style={formItemLabelStyle}>{field.label}</span>}
                   name={field.name}
                   rules={field.rules}
-                  //   initialValue={field.initialValue}
+                  initialValue={field.value}
                 >
-                  <Input.TextArea placeholder={`Enter ${field.name}`} />
+                  <Input.TextArea disabled placeholder={`Enter ${field.name}`} />
                 </Form.Item>
               )
             case 'select':
@@ -89,9 +90,9 @@ const DynamicFormModal = ({ title, visible, onClose, formDataArray, onSubmit }) 
                   label={<span style={formItemLabelStyle}>{field.label}</span>}
                   name={field.name}
                   rules={field.rules}
-                  initialValue={field.initialValue}
+                  initialValue={field.value}
                 >
-                  <Select placeholder={`Select ${field.name}`}>
+                  <Select disabled placeholder={`Select ${field.name}`}>
                     {field.options.map((option, idx) => (
                       <Select.Option key={idx} value={idx}>
                         {option}
@@ -107,9 +108,9 @@ const DynamicFormModal = ({ title, visible, onClose, formDataArray, onSubmit }) 
                   label={<span style={formItemLabelStyle}>{field.label}</span>}
                   name={field.name}
                   rules={field.rules}
-                  //   initialValue={field.initialValue}
+                  initialValue={field.value}
                 >
-                  <Radio.Group style={{display: "inline-grid"}}>
+                  <Radio.Group disabled style={{display: "inline-grid"}}>
                     {field.options.map((option, idx) => (
                       <Radio key={idx} value={idx} style={ formItemLabelStyle }>
                         {option}
@@ -125,9 +126,9 @@ const DynamicFormModal = ({ title, visible, onClose, formDataArray, onSubmit }) 
                   label={<span style={formItemLabelStyle}>{field.label}</span>}
                   name={field.name}
                   rules={field.rules}
-                  //   initialValue={field.initialValue}
+                  initialValue={field.value}
                 >
-                  <Checkbox.Group dir style={{display: "inline-grid"}}>
+                  <Checkbox.Group disabled style={{display: "inline-grid"}}>
                     {field.options.map((option, idx) => (
                       <Checkbox key={idx} value={idx} style={formItemLabelStyle}>
                         {option}
@@ -143,7 +144,7 @@ const DynamicFormModal = ({ title, visible, onClose, formDataArray, onSubmit }) 
         <Row justify="center">
           <Col>
             <Button type="primary" htmlType="submit">
-              Submit
+              Cancel
             </Button>
           </Col>
         </Row>
