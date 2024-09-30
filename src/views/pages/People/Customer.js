@@ -269,12 +269,7 @@ const CustomerTable = () => {
       align: 'center',
       render: (text, record) => (
         <>
-          <Button
-            color="primary"
-            size="large"
-            variant="text"
-            onClick={() => showModal(record)}
-          >
+          <Button color="primary" size="large" variant="text" onClick={() => showModal(record)}>
             <EditOutlined style={{ fontSize: '20px' }} />
           </Button>
           <Button

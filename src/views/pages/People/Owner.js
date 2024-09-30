@@ -238,13 +238,8 @@ const OwnerTable = () => {
       align: 'center',
       render: (text, record) => (
         <>
-          <Button
-            color="primary"
-            size="large"
-            variant="text"
-            onClick={() => showModal(record)}
-          >
-            <EditOutlined style={{ fontSize: '20px' }}/>
+          <Button color="primary" size="large" variant="text" onClick={() => showModal(record)}>
+            <EditOutlined style={{ fontSize: '20px' }} />
           </Button>
           <Button
             size="large"
@@ -253,7 +248,7 @@ const OwnerTable = () => {
             variant="text"
             onClick={() => handleDelete(record.id)}
           >
-            <DeleteOutlined style={{ fontSize: '20px' }}/>
+            <DeleteOutlined style={{ fontSize: '20px' }} />
           </Button>
         </>
       ),

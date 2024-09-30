@@ -16,6 +16,7 @@ import {
   Radio,
   Space,
   Card,
+  Tag,
 } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -25,10 +26,11 @@ import {
   EditOutlined,
   FolderViewOutlined,
   FileAddOutlined,
+  UserAddOutlined,
 } from '@ant-design/icons'
 import { updateData, createData, deleteData, getData } from '../../../api'
 import Highlighter from 'react-highlight-words'
-// import DynamicFormModal from './ModalForm'
+import DynamicFormModal from './ModalForm'
 
 const { Step } = Steps
 const { TextArea } = Input
@@ -38,8 +40,8 @@ const ServiceTable = () => {
   const [customerData, setCustomerData] = useState([])
   const [serviceData, setServiceData] = useState([])
   const [isModalVisible, setIsModalVisible] = useState(false)
-  // const [serviceName, setServiceName] = useState('')
-  // const [isViewModalVisible, setIsViewModalVisible] = useState(false)
+  const [serviceName, setServiceName] = useState('')
+  const [isViewModalVisible, setIsViewModalVisible] = useState(false)
   // const [currentService, setCurrentService] = useState(null)
   const [currentForm, setCurrentForm] = useState(null)
   const [form] = Form.useForm()
@@ -51,6 +53,24 @@ const ServiceTable = () => {
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
   const searchInput = useRef(null)
+  const statusList = [
+    {
+      value: 'Pending',
+      color: 'yellow',
+    },
+    {
+      value: 'Running',
+      color: 'geekblue',
+    },
+    {
+      value: 'Complete',
+      color: 'green',
+    },
+    {
+      value: 'Maintance',
+      color: 'green',
+    },
+  ]
 
   // const handleOpenViewModal = () => {
   //   setIsViewModalVisible(true)
@@ -186,17 +206,20 @@ const ServiceTable = () => {
 
   const loadForms = async () => {
     try {
+      const response0 = await getData('job')
       const response1 = await getData('service')
       const response2 = await getData('form')
       const response3 = await getData('customer')
+
+      let jobList = response0.data
       let formList = response2.data
       let serviceList = response1.data
       let customerList = response3.data
-      formList.forEach((f) => {
-        f.cname = customerList.find((c) => f.cid == c.id).name
-        f.sname = serviceList.find((s) => f.sid == s.id).name
+      jobList.forEach((j) => {
+        j.cname = customerList.find((c) => j.cid == c.id).name
+        j.sname = serviceList.find((s) => j.sid == s.id).name
       })
-      setData(formList)
+      setData(jobList)
       let serviceOption = serviceList.map((r) => ({ label: r.name, value: r.id, data: r.formData }))
       let customerOption = customerList.map((r) => ({ label: r.name, value: r.id }))
       setServiceData(serviceOption)
@@ -322,30 +345,76 @@ const ServiceTable = () => {
   }
 
   const columns = [
-    {
-      title: 'Customer Name',
-      dataIndex: 'cname',
-      key: 'cname',
-      ...getColumnSearchProps('cname'),
-      width: 350,
-      sorter: (a, b) => a.cname.localeCompare(b.cname),
-      ellipsis: true,
-    },
+    // {
+    //   title: 'Customer Name',
+    //   dataIndex: 'cname',
+    //   key: 'cname',
+    //   ...getColumnSearchProps('cname'),
+    //   width: 250,
+    //   sorter: (a, b) => a.cname.localeCompare(b.cname),
+    //   ellipsis: true,
+    // },
     {
       title: 'Service Name',
       dataIndex: 'sname',
       key: 'sname',
-      ...getColumnSearchProps('sname'),
-      width: 350,
+      width: 250,
       //render: (price) => price.toLocaleString("en-US", {style:"currency", currency:"USD"}),
       sorter: (a, b) => a.sname.localeCompare(b.sname),
       ellipsis: true,
     },
     {
+      title: 'Budget',
+      dataIndex: 'budget',
+      key: 'budget',
+      width: 200,
+      render: (budget) => budget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+      sorter: (a, b) => a.budget - b.budget,
+      ellipsis: true,
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      width: 150,
+      render: (status) => (
+        <>
+          <Tag
+            color={
+              statusList.find((r) => r.value == status)
+                ? statusList.find((r) => r.value == status).color
+                : ''
+            }
+            key={status}
+          >
+            {status}
+          </Tag>
+        </>
+      ),
+      filters: statusList.map((r) => ({
+        text: <Tag color={r.color}>{r.value}</Tag>,
+        value: r.value,
+      })),
+
+      // [
+      //   {
+      //     text: <Tag style={{ color: 'yellow' }}>Pending</Text>,
+      //     value: 'Pending',
+      //   },
+      //   {
+      //     text: <Tag style={{ color: 'blue' }}>Running</Text>,
+      //     value: 'Running',
+      //   },
+      // ],
+      onFilter: (value, record) => record.status === value,
+      // sorter: (a, b) => a.sname.localeCompare(b.sname),
+      // ellipsis: true,
+    },
+    {
       title: 'Create Date',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 250,
+      width: 200,
       render: (date) =>
         new Date(date).toLocaleDateString() + ' ' + new Date(date).toLocaleTimeString(),
       sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
@@ -365,11 +434,7 @@ const ServiceTable = () => {
       align: 'center',
       render: (text, record) => (
         <>
-          <Button color="primary" size="large" variant="text" onClick={() => showModal(record)}>
-            <EditOutlined style={{ fontSize: '20px' }} />
-          </Button>
-
-          {/* <Button
+          <Button
             color="primary"
             size="large"
             variant="text"
@@ -377,7 +442,19 @@ const ServiceTable = () => {
             style={{ marginLeft: 5 }}
           >
             <FolderViewOutlined style={{ fontSize: '20px' }} />
-          </Button> */}
+          </Button>
+          <Button color="primary" size="large" variant="text" onClick={() => showModal(record)}>
+            <EditOutlined style={{ fontSize: '20px' }} />
+          </Button>
+          <Button
+            color="primary"
+            size="large"
+            variant="text"
+            onClick={() => showAsignModal(record.id)}
+            style={{ marginLeft: 5 }}
+          >
+            <UserAddOutlined style={{ fontSize: '20px' }} />
+          </Button>
           <Button
             size="large"
             color="danger"

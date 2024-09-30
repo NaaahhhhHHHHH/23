@@ -345,6 +345,23 @@ const _nav = [
     ],
   },
   {
+    component: CNavGroup,
+    name: 'Job',
+    icon: <CIcon icon={cilStar} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Job',
+        to: '/Job/Job',
+      },
+      // {
+      //   component: CNavItem,
+      //   name: 'Form',
+      //   to: '/Service/Form',
+      // },
+    ],
+  },
+  {
     component: CNavItem,
     name: 'Docs',
     href: 'https://coreui.io/react/docs/templates/installation/',
