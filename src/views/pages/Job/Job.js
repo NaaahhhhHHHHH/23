@@ -42,6 +42,7 @@ const ServiceTable = () => {
   const [employeeData, setEmployeeData] = useState([])
   const [serviceData, setServiceData] = useState([])
   const [formData, setformData] = useState([])
+  const [maxBudget, setMaxBudget] = useState(0)
   const [formDataAssign, setformDataAssign] = useState(null)
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [serviceName, setServiceName] = useState('')
@@ -93,8 +94,8 @@ const ServiceTable = () => {
     // if (Cform) {
     //   setFormDataArray(form.data) // Load existing formData
     // }
-    let findService = serviceData.find(r => r.value == CJob.sid)
-    let formValue = formDataArray.find(r => r.id == CJob.formid)
+    let findService = serviceData.find((r) => r.value == CJob.sid)
+    let formValue = formDataArray.find((r) => r.id == CJob.formid)
     setformData(formValue.data)
     setServiceName(findService.label)
     setIsViewModalVisible(true)
@@ -115,7 +116,7 @@ const ServiceTable = () => {
     // if (Cform) {
     //   setFormDataArray(form.data) // Load existing formData
     // }
-    // let findService = serviceData.find(r => r.value == CJob.sid)
+    setMaxBudget(CJob.budget ? CJob.budget : 0)
     // let formValue = formDataArray.find(r => r.id == CJob.formid)
     setformDataAssign({
       eid: null,
@@ -123,9 +124,9 @@ const ServiceTable = () => {
       expire: 1,
       reassignment: false,
       payment: {
-        method: "1 Time",
-        budget: null
-      }
+        method: '1 Time',
+        budget: null,
+      },
     })
     // setServiceName(findService.label)
     setIsAssignModalVisible(true)
@@ -339,7 +340,7 @@ const ServiceTable = () => {
       // })
       // let formData = { ...step1Values, data: formValue.data } // Add formDataArray to form values
       let formValue = form.getFieldsValue()
-      let formData = {...currentJob}
+      let formData = { ...currentJob }
       formData.status = formValue.status ? formValue.status : formData.status
       formData.budget = formValue.budget ? formValue.budget : formData.budget
       let res = currentJob
@@ -520,9 +521,7 @@ const ServiceTable = () => {
   ]
 
   const modalTitle = (
-    <div style={{ textAlign: 'center', width: '100%' }}>
-      {currentJob ? 'Edit Job' : 'Add Job'}
-    </div>
+    <div style={{ textAlign: 'center', width: '100%' }}>{currentJob ? 'Edit Job' : 'Add Job'}</div>
   )
 
   const formItemLabelStyle = {
@@ -562,8 +561,9 @@ const ServiceTable = () => {
         onSubmit={handleSubmitViewModal}
       />
       <AssignFormModal
-        title={"Assignment"}
+        title={'Assignment'}
         visible={isAssignModalVisible}
+        maxBudget={maxBudget}
         onClose={handleCloseAssignModal}
         formDataArray={formDataAssign}
         employeeOptions={employeeData}
@@ -587,38 +587,38 @@ const ServiceTable = () => {
           }}
           scrollToFirstError={true}
         >
-              <Form.Item
-                name="budget"
-                label="Budget"
-                rules={[{ required: true, message: 'Please input budget' }]}
-              >
-                {/* <Select
+          <Form.Item
+            name="budget"
+            label="Budget"
+            rules={[{ required: true, message: 'Please input budget' }]}
+          >
+            {/* <Select
                   showSearch
                   placeholder="Select Customer"
                   optionFilterProp="label"
                   // onChange={}
                   options={customerData}
                 /> */}
-                <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
-              </Form.Item>
-              <Form.Item
-                //placeholder="$"
-                name="status"
-                label="Status"
-                rules={[{ required: true, message: 'Please choose service' }]}
-              >
-                <Select
-                  showSearch
-                  placeholder="Select status"
-                  optionFilterProp="label"
-                  // onChange={(value) => handleChangeService(value)}
-                  options={statusList}
-                />
-              </Form.Item>
+            <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item
+            //placeholder="$"
+            name="status"
+            label="Status"
+            rules={[{ required: true, message: 'Please choose service' }]}
+          >
+            <Select
+              showSearch
+              placeholder="Select status"
+              optionFilterProp="label"
+              // onChange={(value) => handleChangeService(value)}
+              options={statusList}
+            />
+          </Form.Item>
           <div style={{ textAlign: 'center', marginTop: 20 }}>
-              <Button type="primary" htmlType="submit">
-                {currentJob ? 'Update' : 'Add'}
-              </Button>
+            <Button type="primary" htmlType="submit">
+              {currentJob ? 'Update' : 'Add'}
+            </Button>
           </div>
         </Form>
       </Modal>
