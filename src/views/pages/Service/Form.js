@@ -177,8 +177,6 @@ const ServiceTable = () => {
     message.error(error.response.data.message || error.message)
     if (error.status === 403 || error.status === 401) {
       navigate('/login')
-    } else if (error.status === 404) {
-      navigate('/404')
     } else if (error.status === 500) {
       navigate('/500')
     }

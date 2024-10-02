@@ -176,8 +176,6 @@ const ServiceTable = () => {
     message.error(error.response.data.message || error.message)
     if (error.status === 403 || error.status === 401) {
       navigate('/login')
-    } else if (error.status === 404) {
-      navigate('/404')
     } else if (error.status === 500) {
       navigate('/500')
     }
@@ -614,7 +612,6 @@ const ServiceTable = () => {
                                 <Button
                                   color="danger"
                                   variant="link"
-                                  //   icon={<DeleteOutlined />}
                                   style={{ padding: '1px 13px 1px 1px' }}
                                   onClick={(e) => handleDeleteOption(index, 'option', indexOption)}
                                 >

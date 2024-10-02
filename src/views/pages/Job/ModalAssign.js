@@ -11,8 +11,10 @@ import {
   Row,
   Col,
   message,
+  DatePicker,
 } from 'antd'
-
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 const AssignFormModal = ({
   title,
   visible,
@@ -64,11 +66,11 @@ const AssignFormModal = ({
 
   const handleFinish = async (values) => {
     // Submit the values
-    const formattedValues = formDataArray.map((field, index) => ({
-      ...field,
-      value: values[field.fieldname],
-    }))
-
+    const formattedValues = form.getFieldsValue()
+    if (formattedValues.payment.method == 'Period') {
+      formattedValues.payment.period.forEach((r) => (r.date = r.date.format(dateFormat)))
+      formattedValues.payment.budget = totalBudget()
+    }
     onSubmit(formattedValues)
     form.resetFields()
     setFields(null)
@@ -76,9 +78,47 @@ const AssignFormModal = ({
   }
 
   const handleMethodChange = async (value) => {
-    let formData = { ...fields }
+    let formData = form.getFieldsValue()
     formData.payment.method = value
+    if (value == 'Period') {
+      formData.payment.period = [
+        {
+          date: null,
+          budget: null,
+        },
+      ]
+    }
     setFields(formData)
+    form.setFieldsValue(formData)
+  }
+
+  const handleAddPeriod = async () => {
+    let formData = form.getFieldsValue()
+    formData.payment.period.push({
+      date: null,
+      budget: null,
+    })
+    setFields(formData)
+    form.setFieldsValue(formData)
+  }
+
+  const totalBudget = () => {
+    let formData = form.getFieldsValue()
+    let totalBudget = 0
+    if (formData.payment.method == 'Period') {
+      formData.payment.period.forEach((r) => {
+        let budget = r.budget ? r.budget : 0
+        totalBudget += budget
+      })
+    }
+    return totalBudget
+  }
+
+  const handleDeletePeriod = async (index) => {
+    let formData = form.getFieldsValue()
+    formData.payment.period.splice(index, 1)
+    setFields(formData)
+    form.setFieldsValue(formData)
   }
 
   const handleCancel = async () => {
@@ -95,6 +135,8 @@ const AssignFormModal = ({
     maxWidth: '95%',
   }
 
+  const dateFormat = 'YYYY/MM/DD'
+
   return (
     <Modal
       title={modalTitle}
@@ -104,7 +146,13 @@ const AssignFormModal = ({
       width={700}
       style={{ top: 120, maxHeight: '85vh', overflowY: 'auto', overflowX: 'hidden' }}
     >
-      <Form form={form} layout="vertical" onFinish={handleFinish}>
+      <Form
+        form={form}
+        /*layout="vertical"*/
+        onFinish={handleFinish}
+        labelCol={{ span: 6 }}
+        wrapperCol={{ span: 15 }}
+      >
         {fields && (
           <>
             <Form.Item
@@ -164,9 +212,19 @@ const AssignFormModal = ({
             <Form.Item
               label="Payment method"
               name={['payment', 'method']}
-              initialValue="Waitting"
+              initialValue="1 Time"
               value={fields.payment.method}
-              rules={[{ required: true, message: 'Please choose payment method' }]}
+              rules={[
+                { required: true, message: 'Please choose payment method' },
+                ({ getFieldValue }) => ({
+                  validator: (_, value) =>
+                    totalBudget() <= maxBudget
+                      ? Promise.resolve()
+                      : Promise.reject(
+                          new Error(`Total budget limit exceeded maximum ($${maxBudget})`),
+                        ),
+                }),
+              ]}
             >
               <Select onChange={(value) => handleMethodChange(value)}>
                 <Select.Option key="1 Time" value="1 Time">
@@ -192,13 +250,79 @@ const AssignFormModal = ({
                         value <= maxBudget
                           ? Promise.resolve()
                           : Promise.reject(
-                              new Error(`budget limit exceeded maximum ($${maxBudget})`),
+                              new Error(`Budget limit exceeded maximum ($${maxBudget})`),
                             ),
                     }),
                   ]}
                 >
                   <InputNumber step={0.01} style={{ width: '100%' }} />
                 </Form.Item>
+              </>
+            )}
+            {fields.payment.method === 'Period' && (
+              <>
+                {fields.payment.period.map((field, index) => (
+                  <Row key={index} gutter={10} style={{ position: 'relative', left: 88 }}>
+                    <Col span={8}>
+                      <Form.Item
+                        name={['payment', 'period', index, 'date']}
+                        label={`Period ${index + 1}`}
+                        labelCol={{ span: 30 }}
+                        wrapperCol={{ span: 30 }}
+                        rules={[{ required: true, message: 'Please choose date' }]}
+                        value={field.date ? dayjs(field.date, dateFormat) : null}
+                      >
+                        <DatePicker format={dateFormat} placeholder="Date" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item
+                        wrapperCol={{ span: 30 }}
+                        name={['payment', 'period', index, 'budget']}
+                        value={fields.payment.period[index].budget}
+                        rules={[
+                          { required: true, message: 'Please input budget' },
+                          // ({ getFieldValue }) => ({
+                          //   validator: (_, value) =>
+                          //     value <= maxBudget
+                          //       ? Promise.resolve()
+                          //       : Promise.reject(
+                          //           new Error(`budget limit exceeded maximum ($${maxBudget})`),
+                          //         ),
+                          // }),
+                        ]}
+                        // label={`Budget ${index + 1}`}
+                        // value={field.budget}
+                      >
+                        <InputNumber style={{ width: 150 }} placeholder="Budget" />
+                      </Form.Item>
+                    </Col>
+                    {fields.payment.period.length > 1 && (
+                      <>
+                        <Button
+                          color="danger"
+                          variant="link"
+                          style={{ padding: '1px 13px 1px 1px' }}
+                          onClick={(e) => handleDeletePeriod(index)}
+                        >
+                          x
+                        </Button>
+                      </>
+                    )}
+                    {fields.payment.period.length == index + 1 && (
+                      <>
+                        <Button
+                          color="primary"
+                          variant="dashed"
+                          // style={{ padding: '1px 13px 1px 1px' }}
+                          onClick={(e) => handleAddPeriod()}
+                        >
+                          +
+                        </Button>
+                      </>
+                    )}
+                  </Row>
+                ))}
               </>
             )}
           </>

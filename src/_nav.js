@@ -354,6 +354,11 @@ const _nav = [
         name: 'Job',
         to: '/Job/Job',
       },
+      {
+        component: CNavItem,
+        name: 'Assign',
+        to: '/Job/Assign',
+      },
       // {
       //   component: CNavItem,
       //   name: 'Form',

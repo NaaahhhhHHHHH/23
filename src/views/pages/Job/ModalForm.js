@@ -35,17 +35,13 @@ const DynamicFormModal = ({ title, visible, onClose, formDataArray, onSubmit }) 
     onClose()
   }
 
-  const modalTitle = (
-    <div style={{ textAlign: 'center', width: '100%' }}>
-      {`${title} Form`}
-    </div>
-  )
+  const modalTitle = <div style={{ textAlign: 'center', width: '100%' }}>{`${title} Form`}</div>
 
   const formItemLabelStyle = {
     whiteSpace: 'pre-wrap',
     wordWrap: 'break-word',
     maxWidth: '95%',
-  };
+  }
 
   return (
     <Modal
@@ -110,9 +106,9 @@ const DynamicFormModal = ({ title, visible, onClose, formDataArray, onSubmit }) 
                   rules={field.rules}
                   initialValue={field.value}
                 >
-                  <Radio.Group disabled style={{display: "inline-grid"}}>
+                  <Radio.Group disabled style={{ display: 'inline-grid' }}>
                     {field.options.map((option, idx) => (
-                      <Radio key={idx} value={idx} style={ formItemLabelStyle }>
+                      <Radio key={idx} value={idx} style={formItemLabelStyle}>
                         {option}
                       </Radio>
                     ))}
@@ -128,7 +124,7 @@ const DynamicFormModal = ({ title, visible, onClose, formDataArray, onSubmit }) 
                   rules={field.rules}
                   initialValue={field.value}
                 >
-                  <Checkbox.Group disabled style={{display: "inline-grid"}}>
+                  <Checkbox.Group disabled style={{ display: 'inline-grid' }}>
                     {field.options.map((option, idx) => (
                       <Checkbox key={idx} value={idx} style={formItemLabelStyle}>
                         {option}

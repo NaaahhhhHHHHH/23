@@ -8,6 +8,7 @@ const Form = React.lazy(() => import('./views/pages/Service/Form'))
 const Service = React.lazy(() => import('./views/pages/Service/Service'))
 
 const Job = React.lazy(() => import('./views/pages/Job/Job'))
+const Assign = React.lazy(() => import('./views/pages/Job/Assign'))
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
@@ -112,6 +113,7 @@ const routes = [
   { path: '/Service/Service', name: 'Service', element: Service },
   { path: '/Service/Form', name: 'Form', element: Form },
   { path: '/Job/Job', name: 'Job', element: Job },
+  { path: '/Job/Assign', name: 'Assign', element: Assign },
 ]
 
 export default routes
