@@ -38,9 +38,10 @@ const { TextArea } = Input
 
 const ServiceTable = () => {
   const [data, setData] = useState([])
-  const [customerData, setCustomerData] = useState([])
+  // const [customerData, setCustomerData] = useState([])
   const [employeeData, setEmployeeData] = useState([])
   const [serviceData, setServiceData] = useState([])
+  const [jobData, setJobData] = useState([])
   const [formData, setformData] = useState([])
   const [maxBudget, setMaxBudget] = useState(0)
   const [formDataAssign, setformDataAssign] = useState(null)
@@ -63,24 +64,24 @@ const ServiceTable = () => {
   const searchInput = useRef(null)
   const statusList = [
     {
-      value: 'Pending',
-      label: 'Pending',
-      color: 'yellow',
-    },
-    {
-      value: 'Running',
-      label: 'Running',
+      value: 'Waitting',
+      label: 'Waitting',
       color: 'geekblue',
     },
     {
-      value: 'Complete',
-      label: 'Complete',
+      value: 'Accepted',
+      label: 'Accepted',
       color: 'green',
     },
     {
-      value: 'Maintance',
-      label: 'Maintance',
-      color: 'green',
+      value: 'Decline',
+      label: 'Decline',
+      color: 'red',
+    },
+    {
+      value: 'Expired',
+      label: 'Expired',
+      color: 'yellow',
     },
   ]
 
@@ -146,7 +147,7 @@ const ServiceTable = () => {
         sid: currentJob.sid,
         jid: currentJob.id,
       })
-      loadJobs()
+      loadAssign()
       handleCloseModal()
       message.success(res.data.message)
       handleCloseAssignModal()
@@ -260,7 +261,7 @@ const ServiceTable = () => {
   })
 
   useEffect(() => {
-    loadJobs()
+    loadAssign()
   }, [])
 
   const handleError = (error) => {
@@ -272,31 +273,35 @@ const ServiceTable = () => {
     }
   }
 
-  const loadJobs = async () => {
+  const loadAssign = async () => {
     try {
       const response0 = await getData('job')
       const response1 = await getData('service')
-      const response2 = await getData('form')
-      const response3 = await getData('customer')
+      // const response2 = await getData('form')
+      // const response3 = await getData('customer')
       const response4 = await getData('employee')
+      const response5 = await getData('assignment')
 
       let jobList = response0.data
-      let formList = response2.data
+      // let formList = response2.data
       let serviceList = response1.data
-      let customerList = response3.data
+      // let customerList = response3.data
       let employeeList = response4.data
-      jobList.forEach((j) => {
-        j.cname = customerList.find((c) => j.cid == c.id).name
-        j.sname = serviceList.find((s) => j.sid == s.id).name
+      let assignmentList = response5.data
+
+      assignmentList.forEach((a) => {
+        a.ename = employeeList.find((e) => a.eid == e.id).name
+        a.sname = serviceList.find((s) => a.sid == s.id).name
       })
-      setData(jobList)
+      setData(assignmentList)
       let serviceOption = serviceList.map((r) => ({ label: r.name, value: r.id, data: r.formData }))
-      let customerOption = customerList.map((r) => ({ label: r.name, value: r.id }))
+      // let customerOption = customerList.map((r) => ({ label: r.name, value: r.id }))
       let employeeOption = employeeList.map((r) => ({ label: r.name, value: r.id }))
       setServiceData(serviceOption)
-      setCustomerData(customerOption)
+      setJobData(jobList)
+      // setCustomerData(customerOption)
       setEmployeeData(employeeOption)
-      setFormDataArray(formList)
+      // setFormDataArray(formList)
     } catch (error) {
       handleError(error)
     }
@@ -335,7 +340,7 @@ const ServiceTable = () => {
   const handleDelete = async (id) => {
     try {
       let res = await deleteData('job', id)
-      loadJobs()
+      loadAssign()
       message.success(res.data.message)
     } catch (error) {
       handleError(error)
@@ -357,7 +362,7 @@ const ServiceTable = () => {
       let res = currentJob
         ? await updateData('job', currentJob.id, formData)
         : await createData('job', formData)
-      loadJobs()
+      loadAssign()
       handleCloseModal()
       message.success(res.data.message)
     } catch (error) {
@@ -406,6 +411,16 @@ const ServiceTable = () => {
 
   const columns = [
     {
+      title: 'Employee Name',
+      dataIndex: 'ename',
+      key: 'ename',
+      width: 200,
+      ...getColumnSearchProps('ename'),
+      //render: (price) => price.toLocaleString("en-US", {style:"currency", currency:"USD"}),
+      sorter: (a, b) => a.ename.localeCompare(b.ename),
+      ellipsis: true,
+    },
+    {
       title: 'Service Name',
       dataIndex: 'sname',
       key: 'sname',
@@ -415,25 +430,19 @@ const ServiceTable = () => {
       sorter: (a, b) => a.sname.localeCompare(b.sname),
       ellipsis: true,
     },
-    {
-      title: 'Customer Name',
-      dataIndex: 'cname',
-      key: 'cname',
-      ...getColumnSearchProps('cname'),
-      width: 200,
-      sorter: (a, b) => a.cname.localeCompare(b.cname),
-      ellipsis: true,
-    },
+    Table.EXPAND_COLUMN,
     {
       title: 'Budget',
-      dataIndex: 'budget',
-      key: 'budget',
+      dataIndex: 'payment',
+      key: 'payment',
       width: 200,
       // ...getColumnSearchProps('budget'),
-      render: (budget) => budget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
-      sorter: (a, b) => a.budget - b.budget,
+      render: (payment) =>
+        payment.budget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+      sorter: (a, b) => a.payment.budget - b.payment.budget,
       ellipsis: true,
     },
+    Table.SELECTION_COLUMN,
     {
       title: 'Status',
       dataIndex: 'status',
@@ -496,15 +505,6 @@ const ServiceTable = () => {
       align: 'center',
       render: (text, record) => (
         <>
-          <Button
-            color="primary"
-            size="large"
-            variant="text"
-            onClick={() => showViewModal(record)}
-            style={{ marginLeft: 5 }}
-          >
-            <FolderViewOutlined style={{ fontSize: '20px' }} />
-          </Button>
           <Button color="primary" size="large" variant="text" onClick={() => showModal(record)}>
             <EditOutlined style={{ fontSize: '20px' }} />
           </Button>
@@ -552,17 +552,29 @@ const ServiceTable = () => {
             style={{ width: '100%' }}
           />
         </Col> */}
-        {/* <Col>
+        <Col>
           <Button color="primary" variant="text" size="large" onClick={() => showModal(null)}>
             <FileAddOutlined style={{ fontSize: '20px' }}></FileAddOutlined>
           </Button>
-        </Col> */}
+        </Col>
       </Row>
       <Table
         columns={columns}
         dataSource={data}
         pagination={{ pageSize: 10 }}
-        locale={{ emptyText: 'No jobs found' }}
+        locale={{ emptyText: 'No assignment found' }}
+        expandable={{
+          expandedRowRender: (record) => (
+            <p
+              style={{
+                margin: 0,
+              }}
+            >
+              {record.description}
+            </p>
+          ),
+          rowExpandable: (record) => record.payment.method == 'Period',
+        }}
       />
       <DynamicFormModal
         title={serviceName}
