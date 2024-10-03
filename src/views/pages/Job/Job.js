@@ -41,6 +41,7 @@ const ServiceTable = () => {
   const [customerData, setCustomerData] = useState([])
   const [employeeData, setEmployeeData] = useState([])
   const [serviceData, setServiceData] = useState([])
+  const [assignmentData, setAssignmentData] = useState([])
   const [formData, setformData] = useState([])
   const [maxBudget, setMaxBudget] = useState(0)
   const [formDataAssign, setformDataAssign] = useState(null)
@@ -57,6 +58,7 @@ const ServiceTable = () => {
   // const [step1Values, setStep1Values] = useState({})
   const [formDataArray, setFormDataArray] = useState([]) // Default one field
   const navigate = useNavigate()
+  const role = localStorage.getItem('CRM-role')
 
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
@@ -116,18 +118,15 @@ const ServiceTable = () => {
     // if (Cform) {
     //   setFormDataArray(form.data) // Load existing formData
     // }
-    setMaxBudget(CJob.budget ? CJob.budget : 0)
+    let maxBudget = CJob.currentbudget ? CJob.currentbudget : 0
+    if (role == 'employee') {
+      let eid = localStorage.getItem('CRM-id')
+      let selfAssign = assignmentData.find(r => r.eid == eid && r.jid == CJob.id)
+      maxBudget = selfAssign ? selfAssign.payment.currentbudget : 0
+    }
+    setMaxBudget(parseFloat(maxBudget.toFixed(2)))
     // let formValue = formDataArray.find(r => r.id == CJob.formid)
-    setformDataAssign({
-      eid: null,
-      status: 'Waitting',
-      expire: 1,
-      reassignment: false,
-      payment: {
-        method: '1 Time',
-        budget: null,
-      },
-    })
+    setformDataAssign(null)
     setCurrentJob(CJob)
     // setServiceName(findService.label)
     setIsAssignModalVisible(true)
@@ -279,12 +278,14 @@ const ServiceTable = () => {
       const response2 = await getData('form')
       const response3 = await getData('customer')
       const response4 = await getData('employee')
+      const response5 = await getData('assignment')
 
       let jobList = response0.data
       let formList = response2.data
       let serviceList = response1.data
       let customerList = response3.data
       let employeeList = response4.data
+      let assignmentList = response5.data
       jobList.forEach((j) => {
         j.cname = customerList.find((c) => j.cid == c.id).name
         j.sname = serviceList.find((s) => j.sid == s.id).name
@@ -297,6 +298,7 @@ const ServiceTable = () => {
       setCustomerData(customerOption)
       setEmployeeData(employeeOption)
       setFormDataArray(formList)
+      setAssignmentData(assignmentList)
     } catch (error) {
       handleError(error)
     }
@@ -406,6 +408,16 @@ const ServiceTable = () => {
 
   const columns = [
     {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: 80,
+      ...getColumnSearchProps('id'),
+      //render: (price) => price.toLocaleString("en-US", {style:"currency", currency:"USD"}),
+      sorter: (a, b) => a.id.localeCompare(b.id),
+      ellipsis: true,
+    },
+    {
       title: 'Service Name',
       dataIndex: 'sname',
       key: 'sname',
@@ -428,7 +440,7 @@ const ServiceTable = () => {
       title: 'Budget',
       dataIndex: 'budget',
       key: 'budget',
-      width: 200,
+      width: 150,
       // ...getColumnSearchProps('budget'),
       render: (budget) => budget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
       sorter: (a, b) => a.budget - b.budget,
@@ -561,7 +573,7 @@ const ServiceTable = () => {
       <Table
         columns={columns}
         dataSource={data}
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 5 }}
         locale={{ emptyText: 'No jobs found' }}
       />
       <DynamicFormModal

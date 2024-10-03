@@ -49,9 +49,25 @@ const AssignFormModal = ({
       //   value: item.value,
       // }))
       setFields(formDataArray)
+      if (formDataArray.payment.period) {
+        formDataArray.payment.period.forEach(r => {
+            r.date = dayjs(r.date, dateFormat)
+        })
+      }
+      form.setFieldsValue(formDataArray)
       // form.resetFields() // Clear the form on modal open
     } else {
       setFields({
+        eid: null,
+        status: 'Waitting',
+        expire: 1,
+        reassignment: false,
+        payment: {
+          method: '1 Time',
+          budget: null,
+        },
+      })
+      form.setFieldsValue({
         eid: null,
         status: 'Waitting',
         expire: 1,
@@ -330,7 +346,7 @@ const AssignFormModal = ({
         <Row justify="center">
           <Col>
             <Button type="primary" htmlType="submit">
-              {formDataArray ? 'Add' : 'Edit'}
+              {formDataArray ? 'Edit' : 'Add'}
             </Button>
           </Col>
         </Row>

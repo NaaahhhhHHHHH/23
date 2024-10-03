@@ -4,17 +4,17 @@ import { CFooter } from '@coreui/react'
 const AppFooter = () => {
   return (
     <CFooter className="px-4">
-      <div>
-        <a href="https://" target="_blank" rel="noopener noreferrer">
-          @@
-        </a>
+      {/* <div>
+        <h href="https://" target="_blank" rel="noopener noreferrer">
+          CRM App
+        </h>
         <span className="ms-1">&copy; 2024 .</span>
-      </div>
+      </div> */}
       <div className="ms-auto">
-        <span className="me-1">Powered by</span>
-        <a href="https://" target="_blank" rel="noopener noreferrer">
-          @@
-        </a>
+        <h href="https://" target="_blank" rel="noopener noreferrer">
+          CRM App
+        </h>
+        <span className="ms-1">&copy; 2024 .</span>
       </div>
     </CFooter>
   )

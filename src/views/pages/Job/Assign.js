@@ -58,6 +58,7 @@ const ServiceTable = () => {
   // const [step1Values, setStep1Values] = useState({})
   const [formDataArray, setFormDataArray] = useState([]) // Default one field
   const navigate = useNavigate()
+  const role = localStorage.getItem('CRM-role')
 
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
@@ -89,12 +90,13 @@ const ServiceTable = () => {
   //   setIsViewModalVisible(true)
   // }
 
-  const showViewModal = (CJob) => {
+  const showViewModal = (CAssign) => {
     // setCurrentForm(Cform)
     // setServiceName(service.name)
     // if (Cform) {
     //   setFormDataArray(form.data) // Load existing formData
     // }
+    let CJob = jobData.find((r) => r.id == CAssign.jid)
     let findService = serviceData.find((r) => r.value == CJob.sid)
     let formValue = formDataArray.find((r) => r.id == CJob.formid)
     setformData(formValue.data)
@@ -111,24 +113,22 @@ const ServiceTable = () => {
     handleCloseViewModal()
   }
 
-  const showAssignModal = (CJob) => {
+  const showAssignModal = (CAssign, reAssign) => {
     // setCurrentForm(Cform)
     // setServiceName(service.name)
     // if (Cform) {
     //   setFormDataArray(form.data) // Load existing formData
     // }
-    setMaxBudget(CJob.budget ? CJob.budget : 0)
+    let CJob = jobData.find(r => r.id == CAssign.jid)
+    let maxBudget = CJob.currentbudget ? CJob.currentbudget : 0
+    if (CAssign.assignby) {
+      let selfAssign = data.find(r => r.eid == CAssign.assignby && r.jid == CJob.id)
+      maxBudget = selfAssign ? selfAssign.payment.currentbudget : 0
+    }
+    maxBudget = CAssign ? CAssign.payment.budget + maxBudget : maxBudget
+    setMaxBudget(parseFloat(maxBudget.toFixed(2)))
     // let formValue = formDataArray.find(r => r.id == CJob.formid)
-    setformDataAssign({
-      eid: null,
-      status: 'Waitting',
-      expire: 1,
-      reassignment: false,
-      payment: {
-        method: '1 Time',
-        budget: null,
-      },
-    })
+    setformDataAssign(CAssign)
     setCurrentJob(CJob)
     // setServiceName(findService.label)
     setIsAssignModalVisible(true)
@@ -136,13 +136,18 @@ const ServiceTable = () => {
 
   const handleCloseAssignModal = () => {
     setCurrentJob(null)
+    setformDataAssign(null)
     setIsAssignModalVisible(false)
   }
 
   const handleSubmitAssignModal = async (values) => {
     try {
       console.log('Submitted Values:', values)
-      let res = await createData('assignment', {
+      let res = formDataAssign ? await updateData('assignment', formDataAssign.id, {
+        ...values,
+        sid: currentJob.sid,
+        jid: currentJob.id,
+      }) : await createData('assignment', {
         ...values,
         sid: currentJob.sid,
         jid: currentJob.id,
@@ -277,31 +282,31 @@ const ServiceTable = () => {
     try {
       const response0 = await getData('job')
       const response1 = await getData('service')
-      // const response2 = await getData('form')
+      const response2 = await getData('form')
       // const response3 = await getData('customer')
       const response4 = await getData('employee')
       const response5 = await getData('assignment')
 
       let jobList = response0.data
-      // let formList = response2.data
+      let formList = response2.data
       let serviceList = response1.data
       // let customerList = response3.data
       let employeeList = response4.data
       let assignmentList = response5.data
 
       assignmentList.forEach((a) => {
+        a.key = a.id
         a.ename = employeeList.find((e) => a.eid == e.id).name
         a.sname = serviceList.find((s) => a.sid == s.id).name
       })
       setData(assignmentList)
       let serviceOption = serviceList.map((r) => ({ label: r.name, value: r.id, data: r.formData }))
-      // let customerOption = customerList.map((r) => ({ label: r.name, value: r.id }))
       let employeeOption = employeeList.map((r) => ({ label: r.name, value: r.id }))
       setServiceData(serviceOption)
       setJobData(jobList)
       // setCustomerData(customerOption)
       setEmployeeData(employeeOption)
-      // setFormDataArray(formList)
+      setFormDataArray(formList)
     } catch (error) {
       handleError(error)
     }
@@ -339,7 +344,7 @@ const ServiceTable = () => {
 
   const handleDelete = async (id) => {
     try {
-      let res = await deleteData('job', id)
+      let res = await deleteData('assignment', id)
       loadAssign()
       message.success(res.data.message)
     } catch (error) {
@@ -411,6 +416,17 @@ const ServiceTable = () => {
 
   const columns = [
     {
+      title: 'Job ID',
+      dataIndex: 'jid',
+      key: 'jid',
+      align: 'center',
+      width: 120,
+      ...getColumnSearchProps('jid'),
+      //render: (price) => price.toLocaleString("en-US", {style:"currency", currency:"USD"}),
+      sorter: (a, b) => a.id.localeCompare(b.id),
+      ellipsis: true,
+    },
+    {
       title: 'Employee Name',
       dataIndex: 'ename',
       key: 'ename',
@@ -435,7 +451,7 @@ const ServiceTable = () => {
       title: 'Budget',
       dataIndex: 'payment',
       key: 'payment',
-      width: 200,
+      width: 150,
       // ...getColumnSearchProps('budget'),
       render: (payment) =>
         payment.budget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
@@ -485,7 +501,7 @@ const ServiceTable = () => {
       title: 'Create Date',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 200,
+      width: 180,
       render: (date) =>
         new Date(date).toLocaleDateString() + ' ' + new Date(date).toLocaleTimeString(),
       sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
@@ -505,24 +521,30 @@ const ServiceTable = () => {
       align: 'center',
       render: (text, record) => (
         <>
-          <Button color="primary" size="large" variant="text" onClick={() => showModal(record)}>
-            <EditOutlined style={{ fontSize: '20px' }} />
-          </Button>
           <Button
             color="primary"
             size="large"
             variant="text"
+            onClick={() => showViewModal(record)}
+          >
+            <FolderViewOutlined style={{ fontSize: '20px' }} />
+          </Button>
+          <Button color="primary" size="large" variant="text" onClick={() => showAssignModal(record)}>
+            <EditOutlined style={{ fontSize: '20px' }} />
+          </Button>
+          {/* <Button
+            color="primary"
+            size="large"
+            variant="text"
             onClick={() => showAssignModal(record)}
-            style={{ marginLeft: 5 }}
           >
             <UserAddOutlined style={{ fontSize: '20px' }} />
-          </Button>
+          </Button> */}
           <Button
             size="large"
             color="danger"
             variant="text"
             onClick={() => handleDelete(record.id)}
-            style={{ marginLeft: 5 }}
           >
             <DeleteOutlined style={{ fontSize: '20px' }} />
           </Button>
@@ -543,35 +565,44 @@ const ServiceTable = () => {
 
   return (
     <>
-      <Row style={{ display: 'block', marginBottom: 5, textAlign: 'right' }}>
-        {/* <Col span={12}>
+      {/* <Row style={{ display: 'block', marginBottom: 5, textAlign: 'right' }}>
+        <Col span={12}>
           <Input.Search
             placeholder="Search by name"
             onSearch={handleSearch}
             enterButton
             style={{ width: '100%' }}
           />
-        </Col> */}
+        </Col> 
         <Col>
           <Button color="primary" variant="text" size="large" onClick={() => showModal(null)}>
             <FileAddOutlined style={{ fontSize: '20px' }}></FileAddOutlined>
           </Button>
         </Col>
-      </Row>
+      </Row> */}
       <Table
         columns={columns}
         dataSource={data}
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 5 }}
         locale={{ emptyText: 'No assignment found' }}
         expandable={{
           expandedRowRender: (record) => (
+            <>
+            <p
+              style={{
+                margin: 0,
+              }}
+            >{`Total budget: ${record.payment.budget}$`}</p>
+            {record.payment.period.map((value, idx) => (
             <p
               style={{
                 margin: 0,
               }}
             >
-              {record.description}
+              {`Period ${idx+1}: ${value.date} -> ${value.budget}$`}
             </p>
+            ))}
+            </>
           ),
           rowExpandable: (record) => record.payment.method == 'Period',
         }}

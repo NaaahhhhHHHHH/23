@@ -415,7 +415,7 @@ const ServiceTable = () => {
       <Table
         columns={columns}
         dataSource={data}
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 5 }}
         locale={{ emptyText: 'No services found' }}
       />
       <DynamicFormModal
