@@ -11,8 +11,14 @@ import {
   Row,
   Col,
   message,
+  Space,
+  DatePicker
 } from 'antd'
-
+import {
+  MinusCircleOutlined,
+  PlusOutlined
+} from '@ant-design/icons'
+import { left } from '@popperjs/core'
 const AssignFormModal = ({
   title,
   visible,
@@ -104,7 +110,12 @@ const AssignFormModal = ({
       width={700}
       style={{ top: 120, maxHeight: '85vh', overflowY: 'auto', overflowX: 'hidden' }}
     >
-      <Form form={form} layout="vertical" onFinish={handleFinish}>
+      <Form 
+        form={form} 
+        onFinish={handleFinish}
+        labelCol={{ span: 6 }}
+        wrapperCol={{ span: 15 }}
+      >
         {fields && (
           <>
             <Form.Item
@@ -164,7 +175,7 @@ const AssignFormModal = ({
             <Form.Item
               label="Payment method"
               name={['payment', 'method']}
-              initialValue="Waitting"
+              initialValue="1 Time"
               value={fields.payment.method}
               rules={[{ required: true, message: 'Please choose payment method' }]}
             >
@@ -197,8 +208,46 @@ const AssignFormModal = ({
                     }),
                   ]}
                 >
-                  <InputNumber step={0.01} style={{ width: '100%' }} />
+                  <InputNumber step={0.01} style={{ width: '100%'}} />
                 </Form.Item>
+              </>
+            )}
+            {fields.payment.method === 'Period' && (
+              <>
+                <Form.List name={['payment', 'period']} >
+      {(fields, { add, remove }) => (
+        <>
+          {fields.map(({ key, name, ...restField }) => (
+            <Space key={key} style={{ display: 'flex', marginBottom: 15, position: "relative", left: 80}} align="baseline">
+              <Form.Item
+                style={{marginBottom: 15}}
+                {...restField}
+                label={`Period ${key+1}`}
+                labelCol={{ span: 9 }}
+                name={[name, 'date']}
+                rules={[{ required: true, message: 'Missing date' }]}
+              >
+                <DatePicker placeholder="Date" />
+              </Form.Item>
+              <Form.Item
+                style={{marginBottom: 15}}
+                {...restField}
+                name={[name, 'budget']}
+                rules={[{ required: true, message: 'Missing budget' }]}
+              >
+                <Input placeholder="Budget" />
+              </Form.Item>
+              <MinusCircleOutlined onClick={() => remove(name)} />
+            </Space>
+          ))}
+          <Form.Item>
+            <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+              Add field
+            </Button>
+          </Form.Item>
+        </>
+      )}
+    </Form.List>
               </>
             )}
           </>
