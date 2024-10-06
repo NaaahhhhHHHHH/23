@@ -28,6 +28,9 @@ import {
 } from '@ant-design/icons'
 import { updateData, createData, deleteData, getData } from '../../../api'
 import Highlighter from 'react-highlight-words'
+import dayjs from 'dayjs'
+const dateFormat = 'YYYY/MM/DD'
+const timeFormat = 'YYYY/MM/DD hh:mm:ss'
 // import DynamicFormModal from './ModalForm'
 
 const { Step } = Steps
@@ -175,7 +178,7 @@ const ServiceTable = () => {
 
   const handleError = (error) => {
     message.error(error.response.data.message || error.message)
-    if (error.status === 403 || error.status === 401) {
+    if (error.status == 401) {
       navigate('/login')
     } else if (error.status === 500) {
       navigate('/500')
@@ -345,7 +348,7 @@ const ServiceTable = () => {
       key: 'createdAt',
       width: 250,
       render: (date) =>
-        new Date(date).toLocaleDateString() + ' ' + new Date(date).toLocaleTimeString(),
+        dayjs(date).format(timeFormat),
       sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
       ellipsis: true,
     },

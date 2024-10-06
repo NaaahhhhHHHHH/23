@@ -133,7 +133,7 @@ const EmployeeTable = () => {
 
   const handleError = (error) => {
     message.error(error.response.data.message || error.message)
-    if (error.status == 403 || error.status == 401) {
+    if (error.status == 401) {
       navigate('/login')
     } else if (error.status == 500) {
       navigate('/500')
@@ -280,7 +280,7 @@ const EmployeeTable = () => {
       <Table
         columns={columns}
         dataSource={data}
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 5 }}
         locale={{ emptyText: 'No employees found' }}
       />
       <Modal

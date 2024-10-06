@@ -219,7 +219,7 @@ const AssignFormModal = ({
               initialValue={false}
               value={fields.reassignment ? fields.reassignment : false}
             >
-              <Radio.Group>
+              <Radio.Group disabled={fields.assignby}>
                 <Radio value={false}>False</Radio>
                 <Radio value={true}>True</Radio>
               </Radio.Group>

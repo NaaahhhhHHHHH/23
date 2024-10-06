@@ -16,9 +16,13 @@ import {
   Radio,
   Space,
   Card,
+  Tooltip,
   Tag,
 } from 'antd'
 import { useNavigate } from 'react-router-dom'
+import dayjs from 'dayjs'
+const dateFormat = 'YYYY/MM/DD'
+const timeFormat = 'YYYY/MM/DD hh:mm:ss'
 import {
   SearchOutlined,
   CloseOutlined,
@@ -38,6 +42,7 @@ const { TextArea } = Input
 
 const ServiceTable = () => {
   const [data, setData] = useState([])
+  const [tableData, setTableData] = useState([])
   // const [customerData, setCustomerData] = useState([])
   const [employeeData, setEmployeeData] = useState([])
   const [serviceData, setServiceData] = useState([])
@@ -271,7 +276,7 @@ const ServiceTable = () => {
 
   const handleError = (error) => {
     message.error(error.response.data.message || error.message)
-    if (error.status === 403 || error.status === 401) {
+    if (error.status == 401) {
       navigate('/login')
     } else if (error.status === 500) {
       navigate('/500')
@@ -299,6 +304,13 @@ const ServiceTable = () => {
         a.ename = employeeList.find((e) => a.eid == e.id).name
         a.sname = serviceList.find((s) => a.sid == s.id).name
       })
+      let rootAssignList = assignmentList.filter(r => !r.assignby)
+      let childAssignList = assignmentList.filter(r => r.assignby)
+      rootAssignList.forEach(r => {
+        let childAssign = childAssignList.filter(re => r.eid == re.assignby && r.jid == re.jid)
+        if (childAssign.length) r.children = childAssign
+      })
+      setTableData(rootAssignList)
       setData(assignmentList)
       let serviceOption = serviceList.map((r) => ({ label: r.name, value: r.id, data: r.formData }))
       let employeeOption = employeeList.map((r) => ({ label: r.name, value: r.id }))
@@ -416,17 +428,6 @@ const ServiceTable = () => {
 
   const columns = [
     {
-      title: 'Job ID',
-      dataIndex: 'jid',
-      key: 'jid',
-      align: 'center',
-      width: 120,
-      ...getColumnSearchProps('jid'),
-      //render: (price) => price.toLocaleString("en-US", {style:"currency", currency:"USD"}),
-      sorter: (a, b) => a.id.localeCompare(b.id),
-      ellipsis: true,
-    },
-    {
       title: 'Employee Name',
       dataIndex: 'ename',
       key: 'ename',
@@ -437,28 +438,70 @@ const ServiceTable = () => {
       ellipsis: true,
     },
     {
+      title: 'Job ID',
+      dataIndex: 'jid',
+      key: 'jid',
+      align: 'center',
+      width: 120,
+      ...getColumnSearchProps('jid'),
+      //render: (price) => price.toLocaleString("en-US", {style:"currency", currency:"USD"}),
+      sorter: (a, b) => a.jid - b.jid,
+      //ellipsis: true,
+    },
+    {
       title: 'Service Name',
       dataIndex: 'sname',
       key: 'sname',
-      width: 200,
+      width: 175,
       ...getColumnSearchProps('sname'),
       //render: (price) => price.toLocaleString("en-US", {style:"currency", currency:"USD"}),
       sorter: (a, b) => a.sname.localeCompare(b.sname),
       ellipsis: true,
     },
-    Table.EXPAND_COLUMN,
+    // Table.EXPAND_COLUMN,
     {
       title: 'Budget',
       dataIndex: 'payment',
       key: 'payment',
-      width: 150,
+      width: 175,
       // ...getColumnSearchProps('budget'),
-      render: (payment) =>
-        payment.budget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+      // render: (payment) =>
+      //   payment.budget.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
       sorter: (a, b) => a.payment.budget - b.payment.budget,
       ellipsis: true,
+      render: (payment) => (
+        <Tooltip placement="bottomLeft" title={(<><p
+              style={{
+                margin: 0,
+              }}
+            >{`${payment.period ? 'Total:' : ''} ${payment.budget}$`}</p>
+            {payment.period && payment.period.map((value, idx) => (
+            <p
+              style={{
+                margin: 0,
+              }}
+            >
+              {`${dayjs(value.date).format(dateFormat)}: ${value.budget}$`}
+            </p>
+            ))}</>)}>
+          <p
+              style={{
+                margin: 0,
+              }}
+            >{`${payment.period ? 'Total:' : ''} ${payment.budget}$`}</p>
+            {payment.period && payment.period.map((value, idx) => (
+            <p
+              style={{
+                margin: 0,
+              }}
+            >
+              {`${dayjs(value.date).format(dateFormat)}: ${value.budget}$`}
+            </p>
+            ))}
+        </Tooltip>
+      ),
     },
-    Table.SELECTION_COLUMN,
+    // Table.SELECTION_COLUMN,
     {
       title: 'Status',
       dataIndex: 'status',
@@ -498,12 +541,12 @@ const ServiceTable = () => {
       // ellipsis: true,
     },
     {
-      title: 'Create Date',
+      title: 'Created Date',
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 180,
       render: (date) =>
-        new Date(date).toLocaleDateString() + ' ' + new Date(date).toLocaleTimeString(),
+        dayjs(date).format(timeFormat),
       sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
       ellipsis: true,
     },
@@ -582,30 +625,30 @@ const ServiceTable = () => {
       </Row> */}
       <Table
         columns={columns}
-        dataSource={data}
+        dataSource={tableData}
         pagination={{ pageSize: 5 }}
         locale={{ emptyText: 'No assignment found' }}
-        expandable={{
-          expandedRowRender: (record) => (
-            <>
-            <p
-              style={{
-                margin: 0,
-              }}
-            >{`Total budget: ${record.payment.budget}$`}</p>
-            {record.payment.period.map((value, idx) => (
-            <p
-              style={{
-                margin: 0,
-              }}
-            >
-              {`Period ${idx+1}: ${value.date} -> ${value.budget}$`}
-            </p>
-            ))}
-            </>
-          ),
-          rowExpandable: (record) => record.payment.method == 'Period',
-        }}
+        // expandable={{
+        //   expandedRowRender: (record) => (
+        //     <>
+        //     <p
+        //       style={{
+        //         margin: 0,
+        //       }}
+        //     >{`Total budget: ${record.payment.budget}$`}</p>
+        //     {record.payment.period.map((value, idx) => (
+        //     <p
+        //       style={{
+        //         margin: 0,
+        //       }}
+        //     >
+        //       {`Period ${idx+1}: ${value.date} -> ${value.budget}$`}
+        //     </p>
+        //     ))}
+        //     </>
+        //   ),
+        //   rowExpandable: (record) => record.payment.method == 'Period',
+        // }}
       />
       <DynamicFormModal
         title={serviceName}

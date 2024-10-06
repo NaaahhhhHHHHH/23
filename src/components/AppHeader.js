@@ -40,7 +40,7 @@ const AppHeader = () => {
 
   const handleError = (error) => {
     message.error(error.response.data.message || error.message)
-    if (error.status == 403 || error.status == 401) {
+    if (error.status == 401) {
       navigate('/login')
     } else if (error.status == 404) {
       navigate('/404')

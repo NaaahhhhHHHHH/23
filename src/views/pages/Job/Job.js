@@ -32,6 +32,9 @@ import { updateData, createData, deleteData, getData } from '../../../api'
 import Highlighter from 'react-highlight-words'
 import DynamicFormModal from './ModalForm'
 import AssignFormModal from './ModalAssign'
+import dayjs from 'dayjs'
+const dateFormat = 'YYYY/MM/DD'
+const timeFormat = 'YYYY/MM/DD hh:mm:ss'
 
 const { Step } = Steps
 const { TextArea } = Input
@@ -67,6 +70,11 @@ const ServiceTable = () => {
     {
       value: 'Pending',
       label: 'Pending',
+      color: 'yellow',
+    },
+    {
+      value: 'Preparing',
+      label: 'Preparing',
       color: 'yellow',
     },
     {
@@ -264,7 +272,7 @@ const ServiceTable = () => {
 
   const handleError = (error) => {
     message.error(error.response.data.message || error.message)
-    if (error.status === 403 || error.status === 401) {
+    if (error.status == 401) {
       navigate('/login')
     } else if (error.status === 500) {
       navigate('/500')
@@ -412,6 +420,7 @@ const ServiceTable = () => {
       dataIndex: 'id',
       key: 'id',
       width: 80,
+      align: 'center',
       ...getColumnSearchProps('id'),
       //render: (price) => price.toLocaleString("en-US", {style:"currency", currency:"USD"}),
       sorter: (a, b) => a.id.localeCompare(b.id),
@@ -488,9 +497,9 @@ const ServiceTable = () => {
       title: 'Create Date',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 200,
+      width: 170,
       render: (date) =>
-        new Date(date).toLocaleDateString() + ' ' + new Date(date).toLocaleTimeString(),
+        dayjs(date).format(timeFormat),
       sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
       ellipsis: true,
     },
