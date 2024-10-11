@@ -61,7 +61,9 @@ const ServiceTable = () => {
   // const [step1Values, setStep1Values] = useState({})
   const [formDataArray, setFormDataArray] = useState([]) // Default one field
   const navigate = useNavigate()
+
   const role = localStorage.getItem('CRM-role')
+  const userId = localStorage.getItem('CRM-id')
 
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
@@ -129,7 +131,7 @@ const ServiceTable = () => {
     let maxBudget = CJob.currentbudget ? CJob.currentbudget : 0
     if (role == 'employee') {
       let eid = localStorage.getItem('CRM-id')
-      let selfAssign = assignmentData.find(r => r.eid == eid && r.jid == CJob.id)
+      let selfAssign = assignmentData.find((r) => r.eid == eid && r.jid == CJob.id)
       maxBudget = selfAssign ? selfAssign.payment.currentbudget : 0
     }
     setMaxBudget(parseFloat(maxBudget.toFixed(2)))
@@ -297,6 +299,15 @@ const ServiceTable = () => {
       jobList.forEach((j) => {
         j.cname = customerList.find((c) => j.cid == c.id).name
         j.sname = serviceList.find((s) => j.sid == s.id).name
+        if (role == 'owner') {
+          j.assignable = true
+          j.assigned = true
+        }
+        if (role == 'employee') {
+          let findAssign = assignmentList.find((a) => a.eid == userId && a.jid == j.id)
+          j.assignable = findAssign.reassignment && !findAssign.assignby ? true : false
+          j.assigned = findAssign.status == 'Accepted' ? true : false
+        }
       })
       setData(jobList)
       let serviceOption = serviceList.map((r) => ({ label: r.name, value: r.id, data: r.formData }))
@@ -423,7 +434,7 @@ const ServiceTable = () => {
       align: 'center',
       ...getColumnSearchProps('id'),
       //render: (price) => price.toLocaleString("en-US", {style:"currency", currency:"USD"}),
-      sorter: (a, b) => a.id.localeCompare(b.id),
+      sorter: (a, b) => a.id - b.id,
       ellipsis: true,
     },
     {
@@ -498,8 +509,7 @@ const ServiceTable = () => {
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 170,
-      render: (date) =>
-        dayjs(date).format(timeFormat),
+      render: (date) => dayjs(date).format(timeFormat),
       sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
       ellipsis: true,
     },
@@ -526,27 +536,33 @@ const ServiceTable = () => {
           >
             <FolderViewOutlined style={{ fontSize: '20px' }} />
           </Button>
-          <Button color="primary" size="large" variant="text" onClick={() => showModal(record)}>
-            <EditOutlined style={{ fontSize: '20px' }} />
-          </Button>
-          <Button
-            color="primary"
-            size="large"
-            variant="text"
-            onClick={() => showAssignModal(record)}
-            style={{ marginLeft: 5 }}
-          >
-            <UserAddOutlined style={{ fontSize: '20px' }} />
-          </Button>
-          <Button
-            size="large"
-            color="danger"
-            variant="text"
-            onClick={() => handleDelete(record.id)}
-            style={{ marginLeft: 5 }}
-          >
-            <DeleteOutlined style={{ fontSize: '20px' }} />
-          </Button>
+          {record.assigned && (
+            <Button color="primary" size="large" variant="text" onClick={() => showModal(record)}>
+              <EditOutlined style={{ fontSize: '20px' }} />
+            </Button>
+          )}
+          {record.assignable && record.assigned && (
+            <Button
+              color="primary"
+              size="large"
+              variant="text"
+              onClick={() => showAssignModal(record)}
+              style={{ marginLeft: 5 }}
+            >
+              <UserAddOutlined style={{ fontSize: '20px' }} />
+            </Button>
+          )}
+          {record.assigned && (
+            <Button
+              size="large"
+              color="danger"
+              variant="text"
+              onClick={() => handleDelete(record.id)}
+              style={{ marginLeft: 5 }}
+            >
+              <DeleteOutlined style={{ fontSize: '20px' }} />
+            </Button>
+          )}
         </>
       ),
     },

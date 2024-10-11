@@ -201,17 +201,17 @@ const ServiceTable = () => {
   const showModal = (service) => {
     setCurrentService(service)
     form.setFieldsValue(service)
-    if (service) {
-      setFormDataArray(
-        service.formData || [
-          {
-            type: 'input',
-            label: '',
-            required: false,
-            fieldname: `field_1`,
-          },
-        ],
-      ) // Load existing formData
+    if (service && service.formData) {
+      setFormDataArray(service.formData) // Load existing formData
+    } else {
+      setFormDataArray([
+        {
+          type: 'input',
+          label: '',
+          required: false,
+          fieldname: `field_1`,
+        },
+      ])
     }
     setIsModalVisible(true)
     setCurrentStep(0)
@@ -503,7 +503,7 @@ const ServiceTable = () => {
                         name={['formData', index, 'type']}
                         style={{ marginBottom: 5, marginLeft: 34 }}
                         labelCol={{ span: 6 }}
-                        // initialValue={'input'}
+                        initialValue={'input'}
                         rules={[{ required: true, message: 'Please input field type' }]}
                       >
                         <Select onChange={(value) => handleFieldChange(index, 'type', value)}>
@@ -520,7 +520,7 @@ const ServiceTable = () => {
                         label="Name"
                         name={['formData', index, 'fieldname']}
                         style={{ marginBottom: 5 }}
-                        // initialValue={`field_${index + 1}`}
+                        initialValue={`field_${index + 1}`}
                         rules={[
                           { required: true, message: 'Please input field name' },
                           {
@@ -568,7 +568,7 @@ const ServiceTable = () => {
                         label="Label"
                         name={['formData', index, 'label']}
                         style={{ marginBottom: 5, marginLeft: 30 }}
-                        // initialValue={''}
+                        initialValue={''}
                         rules={[{ required: true, message: 'Please input field label' }]}
                       >
                         <TextArea

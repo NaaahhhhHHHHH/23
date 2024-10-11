@@ -124,10 +124,10 @@ const ServiceTable = () => {
     // if (Cform) {
     //   setFormDataArray(form.data) // Load existing formData
     // }
-    let CJob = jobData.find(r => r.id == CAssign.jid)
+    let CJob = jobData.find((r) => r.id == CAssign.jid)
     let maxBudget = CJob.currentbudget ? CJob.currentbudget : 0
     if (CAssign.assignby) {
-      let selfAssign = data.find(r => r.eid == CAssign.assignby && r.jid == CJob.id)
+      let selfAssign = data.find((r) => r.eid == CAssign.assignby && r.jid == CJob.id)
       maxBudget = selfAssign ? selfAssign.payment.currentbudget : 0
     }
     maxBudget = CAssign ? CAssign.payment.budget + maxBudget : maxBudget
@@ -148,15 +148,17 @@ const ServiceTable = () => {
   const handleSubmitAssignModal = async (values) => {
     try {
       console.log('Submitted Values:', values)
-      let res = formDataAssign ? await updateData('assignment', formDataAssign.id, {
-        ...values,
-        sid: currentJob.sid,
-        jid: currentJob.id,
-      }) : await createData('assignment', {
-        ...values,
-        sid: currentJob.sid,
-        jid: currentJob.id,
-      })
+      let res = formDataAssign
+        ? await updateData('assignment', formDataAssign.id, {
+            ...values,
+            sid: currentJob.sid,
+            jid: currentJob.id,
+          })
+        : await createData('assignment', {
+            ...values,
+            sid: currentJob.sid,
+            jid: currentJob.id,
+          })
       loadAssign()
       handleCloseModal()
       message.success(res.data.message)
@@ -304,10 +306,10 @@ const ServiceTable = () => {
         a.ename = employeeList.find((e) => a.eid == e.id).name
         a.sname = serviceList.find((s) => a.sid == s.id).name
       })
-      let rootAssignList = assignmentList.filter(r => !r.assignby)
-      let childAssignList = assignmentList.filter(r => r.assignby)
-      rootAssignList.forEach(r => {
-        let childAssign = childAssignList.filter(re => r.eid == re.assignby && r.jid == re.jid)
+      let rootAssignList = assignmentList.filter((r) => !r.assignby)
+      let childAssignList = assignmentList.filter((r) => r.assignby)
+      rootAssignList.forEach((r) => {
+        let childAssign = childAssignList.filter((re) => r.eid == re.assignby && r.jid == re.jid)
         if (childAssign.length) r.children = childAssign
       })
       setTableData(rootAssignList)
@@ -470,33 +472,42 @@ const ServiceTable = () => {
       sorter: (a, b) => a.payment.budget - b.payment.budget,
       ellipsis: true,
       render: (payment) => (
-        <Tooltip placement="bottomLeft" title={(<><p
-              style={{
-                margin: 0,
-              }}
-            >{`${payment.period ? 'Total:' : ''} ${payment.budget}$`}</p>
-            {payment.period && payment.period.map((value, idx) => (
-            <p
-              style={{
-                margin: 0,
-              }}
-            >
-              {`${dayjs(value.date).format(dateFormat)}: ${value.budget}$`}
-            </p>
-            ))}</>)}>
+        <Tooltip
+          placement="bottomLeft"
+          title={
+            <>
+              <p
+                style={{
+                  margin: 0,
+                }}
+              >{`${payment.period ? 'Total:' : ''} ${payment.budget}$`}</p>
+              {payment.period &&
+                payment.period.map((value, idx) => (
+                  <p
+                    style={{
+                      margin: 0,
+                    }}
+                  >
+                    {`${dayjs(value.date).format(dateFormat)}: ${value.budget}$`}
+                  </p>
+                ))}
+            </>
+          }
+        >
           <p
-              style={{
-                margin: 0,
-              }}
-            >{`${payment.period ? 'Total:' : ''} ${payment.budget}$`}</p>
-            {payment.period && payment.period.map((value, idx) => (
-            <p
-              style={{
-                margin: 0,
-              }}
-            >
-              {`${dayjs(value.date).format(dateFormat)}: ${value.budget}$`}
-            </p>
+            style={{
+              margin: 0,
+            }}
+          >{`${payment.period ? 'Total:' : ''} ${payment.budget}$`}</p>
+          {payment.period &&
+            payment.period.map((value, idx) => (
+              <p
+                style={{
+                  margin: 0,
+                }}
+              >
+                {`${dayjs(value.date).format(dateFormat)}: ${value.budget}$`}
+              </p>
             ))}
         </Tooltip>
       ),
@@ -545,8 +556,7 @@ const ServiceTable = () => {
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 180,
-      render: (date) =>
-        dayjs(date).format(timeFormat),
+      render: (date) => dayjs(date).format(timeFormat),
       sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
       ellipsis: true,
     },
@@ -564,15 +574,15 @@ const ServiceTable = () => {
       align: 'center',
       render: (text, record) => (
         <>
+          <Button color="primary" size="large" variant="text" onClick={() => showViewModal(record)}>
+            <FolderViewOutlined style={{ fontSize: '20px' }} />
+          </Button>
           <Button
             color="primary"
             size="large"
             variant="text"
-            onClick={() => showViewModal(record)}
+            onClick={() => showAssignModal(record)}
           >
-            <FolderViewOutlined style={{ fontSize: '20px' }} />
-          </Button>
-          <Button color="primary" size="large" variant="text" onClick={() => showAssignModal(record)}>
             <EditOutlined style={{ fontSize: '20px' }} />
           </Button>
           {/* <Button

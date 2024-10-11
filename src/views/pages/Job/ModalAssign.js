@@ -36,6 +36,8 @@ const AssignFormModal = ({
     },
   })
 
+  const role = localStorage.getItem('CRM-role')
+
   useEffect(() => {
     if (formDataArray) {
       // Set the fields from formDataArray to the form
@@ -219,7 +221,7 @@ const AssignFormModal = ({
               initialValue={false}
               value={fields.reassignment ? fields.reassignment : false}
             >
-              <Radio.Group disabled={fields.assignby}>
+              <Radio.Group disabled={fields.assignby || role != 'owner'}>
                 <Radio value={false}>False</Radio>
                 <Radio value={true}>True</Radio>
               </Radio.Group>
