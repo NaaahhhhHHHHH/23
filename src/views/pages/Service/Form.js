@@ -350,6 +350,7 @@ const ServiceTable = () => {
       render: (date) =>
         dayjs(date).format(timeFormat),
       sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
+      defaultSortOrder: 'descend',
       ellipsis: true,
     },
     // {

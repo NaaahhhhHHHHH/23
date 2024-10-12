@@ -36,6 +36,7 @@ import { updateData, createData, deleteData, getData } from '../../../api'
 import Highlighter from 'react-highlight-words'
 import DynamicFormModal from './ModalForm'
 import AssignFormModal from './ModalAssign'
+import { useSelector, useDispatch } from 'react-redux'
 
 const { Step } = Steps
 const { TextArea } = Input
@@ -63,15 +64,17 @@ const ServiceTable = () => {
   // const [step1Values, setStep1Values] = useState({})
   const [formDataArray, setFormDataArray] = useState([]) // Default one field
   const navigate = useNavigate()
-  const role = localStorage.getItem('CRM-role')
+  const user = useSelector((state) => state.user)
+  const role = user ? user.role : ''
+  const userId = user ? user.id : 0
 
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
   const searchInput = useRef(null)
   const statusList = [
     {
-      value: 'Waitting',
-      label: 'Waitting',
+      value: 'Waiting',
+      label: 'Waiting',
       color: 'geekblue',
     },
     {
@@ -79,16 +82,11 @@ const ServiceTable = () => {
       label: 'Accepted',
       color: 'green',
     },
-    {
-      value: 'Decline',
-      label: 'Decline',
-      color: 'red',
-    },
-    {
-      value: 'Expired',
-      label: 'Expired',
-      color: 'yellow',
-    },
+    // {
+    //   value: 'Decline',
+    //   label: 'Decline',
+    //   color: 'red',
+    // },
   ]
 
   // const handleOpenViewModal = () => {
@@ -143,6 +141,20 @@ const ServiceTable = () => {
     setCurrentJob(null)
     setformDataAssign(null)
     setIsAssignModalVisible(false)
+  }
+
+  const handleUpdateStatusAssign = async (record, value) => {
+    try {
+      //console.log('Submitted Values:', values)
+      record.status = value
+      let res = await updateData('assignment', record.id, record)
+      loadAssign()
+      handleCloseModal()
+      message.success(res.data.message)
+      handleCloseAssignModal()
+    } catch (error) {
+      handleError(error)
+    }
   }
 
   const handleSubmitAssignModal = async (values) => {
@@ -274,7 +286,7 @@ const ServiceTable = () => {
 
   useEffect(() => {
     loadAssign()
-  }, [])
+  }, [user])
 
   const handleError = (error) => {
     message.error(error.response.data.message || error.message)
@@ -558,6 +570,7 @@ const ServiceTable = () => {
       width: 180,
       render: (date) => dayjs(date).format(timeFormat),
       sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
+      defaultSortOrder: 'descend',
       ellipsis: true,
     },
     // {
@@ -577,30 +590,50 @@ const ServiceTable = () => {
           <Button color="primary" size="large" variant="text" onClick={() => showViewModal(record)}>
             <FolderViewOutlined style={{ fontSize: '20px' }} />
           </Button>
-          <Button
+          { (role == 'owner' || record.assignby == userId) && (
+          <><Button
+              color="primary"
+              size="large"
+              variant="text"
+              onClick={() => showAssignModal(record)}
+            >
+              <EditOutlined style={{ fontSize: '20px' }} />
+            </Button>
+            <Button
+              size="large"
+              color="danger"
+              variant="text"
+              onClick={() => handleDelete(record.id)}
+            >
+                <DeleteOutlined style={{ fontSize: '20px' }} />
+              </Button></>
+          )}
+          { (role == 'employee' && record.eid == userId) && (
+            <><Button
             color="primary"
-            size="large"
-            variant="text"
-            onClick={() => showAssignModal(record)}
+            size="medium"
+            variant="filled"
+            style={{ 
+              padding: '10px',
+              margin: '5px' 
+            }}
+            onClick={() => handleUpdateStatusAssign(record, 'Accepted')}
           >
-            <EditOutlined style={{ fontSize: '20px' }} />
+            Accept
           </Button>
-          {/* <Button
-            color="primary"
-            size="large"
-            variant="text"
-            onClick={() => showAssignModal(record)}
-          >
-            <UserAddOutlined style={{ fontSize: '20px' }} />
-          </Button> */}
           <Button
-            size="large"
+            size="medium"
             color="danger"
-            variant="text"
+            variant="filled"
+            style={{ 
+              padding: '10px',
+              margin: '5px'
+            }}
             onClick={() => handleDelete(record.id)}
           >
-            <DeleteOutlined style={{ fontSize: '20px' }} />
-          </Button>
+            Decline
+            </Button></>
+          )}
         </>
       ),
     },

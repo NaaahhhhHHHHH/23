@@ -205,6 +205,7 @@ const CustomerTable = () => {
       width: 200,
       ellipsis: true,
       sorter: (a, b) => a.name.localeCompare(b.name),
+      defaultSortOrder: 'ascend',
     },
     {
       title: 'Username',

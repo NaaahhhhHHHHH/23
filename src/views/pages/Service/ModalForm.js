@@ -143,7 +143,7 @@ const DynamicFormModal = ({ title, visible, onClose, formDataArray, onSubmit }) 
         <Row justify="center">
           <Col>
             <Button type="primary" htmlType="submit">
-              Submit
+              OK
             </Button>
           </Col>
         </Row>

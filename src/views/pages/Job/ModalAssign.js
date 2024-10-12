@@ -15,6 +15,7 @@ import {
 } from 'antd'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import { useSelector, useDispatch } from 'react-redux'
 const AssignFormModal = ({
   title,
   visible,
@@ -27,7 +28,7 @@ const AssignFormModal = ({
   const [form] = Form.useForm()
   const [fields, setFields] = useState({
     eid: null,
-    status: 'Waitting',
+    status: 'Waiting',
     expire: 1,
     reassignment: false,
     payment: {
@@ -36,7 +37,9 @@ const AssignFormModal = ({
     },
   })
 
-  const role = localStorage.getItem('CRM-role')
+  const user = useSelector((state) => state.user)
+  const role = user ? user.role : ''
+  const userId = user ? user.id : 0
 
   useEffect(() => {
     if (formDataArray) {
@@ -61,7 +64,7 @@ const AssignFormModal = ({
     } else {
       setFields({
         eid: null,
-        status: 'Waitting',
+        status: 'Waiting',
         expire: 1,
         reassignment: false,
         payment: {
@@ -71,7 +74,7 @@ const AssignFormModal = ({
       })
       form.setFieldsValue({
         eid: null,
-        status: 'Waitting',
+        status: 'Waiting',
         expire: 1,
         reassignment: false,
         payment: {
@@ -188,20 +191,17 @@ const AssignFormModal = ({
               </Select>
             </Form.Item>
 
-            <Form.Item label="Status" name="status" initialValue="Waitting" value={fields.status}>
+            <Form.Item label="Status" name="status" initialValue="Waiting" value={fields.status}>
               <Select>
-                <Select.Option key="Waitting" value="Waitting">
-                  Waitting
+                <Select.Option key="Waiting" value="Waiting">
+                  Waiting
                 </Select.Option>
                 <Select.Option key="Accepted" value="Accepted">
                   Accepted
                 </Select.Option>
-                <Select.Option key="Decline" value="Decline">
+                {/* <Select.Option key="Decline" value="Decline">
                   Decline
-                </Select.Option>
-                <Select.Option key="Expired" value="Expired">
-                  Expired
-                </Select.Option>
+                </Select.Option> */}
               </Select>
             </Form.Item>
 

@@ -22,16 +22,68 @@ import {
   cilUser,
 } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-import { Avatar, Button } from 'antd'
+import { updateData, createData, deleteData, getData } from '../../api'
+import { Avatar, Button, message } from 'antd'
+import { useSelector, useDispatch } from 'react-redux'
+import { auth } from '../../authApi'
 
 const AppHeaderDropdown = () => {
-  const [avatar, setAvatar] = useState('')
-  const name = localStorage.getItem('CRM-name')
-    ? localStorage.getItem('CRM-name').split(' ')[0]
-    : ''
-  const role = localStorage.getItem('CRM-role')
-  const id = localStorage.getItem('CRM-id')
+  const dispatch = useDispatch()
   const navigate = useNavigate()
+  const [countJob, setCountJob] = useState(0)
+  const [countTask, setCountTask] = useState(0)
+
+  useEffect(() => {
+    authenToken()
+  }, [])
+
+  const user = useSelector((state) => state.user)
+  const name = user && user.name ? user.name.split(' ')[0] : ''
+  const role = user && user.role ? user.role : ''
+  const id = user && user.id ? user.id : 0
+
+  useEffect(() => {
+    loadPreData()
+  }, [user])
+
+  const loadPreData = async () => {
+    const response0 = await getData('job')
+    const countJ = response0 && response0.data && response0.data.length ? response0.data.length : 0
+    setCountJob(countJ)
+    const response5 = await getData('assignment')
+    let countT = 0
+    if (response5 && response5.data && response5.data.length && role && id) {
+      if (role == 'owner') countT = response5.data.length
+      if (role == 'employee') countT = response5.data.filter(r => r.eid == id).length
+    }
+    setCountTask(countT)
+  }
+
+  const handleError = (error) => {
+    message.error(error.response.data.message || error.message)
+    if (error.status == 401) {
+      navigate('/login')
+    } else if (error.status == 404) {
+      navigate('/404')
+    } else if (error.status == 500) {
+      navigate('/500')
+    }
+  }
+
+  const authenToken = async () => {
+    try {
+      await auth().then((res) => {
+        dispatch({ type: 'set', user: res.data.user })
+        localStorage.setItem('CRM-token', res.data.token)
+        // name = res.user && res.user.name
+        //   ? res.user.name.split(' ')[0]
+        //   : ''
+      })
+    } catch (error) {
+      handleError(error)
+    }
+  }
+  const [avatar, setAvatar] = useState('None')
 
   useEffect(() => {
     if (role && id) {
@@ -44,18 +96,13 @@ const AppHeaderDropdown = () => {
           setAvatar('None')
         })
     }
-  }, [])
+  }, [user])
 
   const Logout = async (e) => {
     e.preventDefault()
     //setErrorMessage(null) // Clear previous errors
     try {
-      localStorage.removeItem('CRM-id')
-      localStorage.removeItem('CRM-name')
-      localStorage.removeItem('CRM-email')
-      localStorage.removeItem('CRM-username')
-      localStorage.removeItem('CRM-role')
-      localStorage.removeItem('CRM-verification')
+      dispatch({ type: 'set', user: null })
       localStorage.removeItem('CRM-token')
       // if (!res.user.verification) {
       //   navigate('/verification')
@@ -115,11 +162,11 @@ const AppHeaderDropdown = () => {
       </CDropdownToggle>
       <CDropdownMenu className="pt-0" placement="bottom-end">
         <CDropdownHeader className="bg-body-secondary fw-semibold mb-2">Account</CDropdownHeader>
-        <CDropdownItem href="#">
+        <CDropdownItem href="#/Job/Job">
           <CIcon icon={cilBell} className="me-2" />
-          Notice
+          Jobs
           <CBadge color="info" className="ms-2">
-            42
+            {countJob}
           </CBadge>
         </CDropdownItem>
         {/* <CDropdownItem href="#">
@@ -129,11 +176,11 @@ const AppHeaderDropdown = () => {
             42
           </CBadge>
         </CDropdownItem> */}
-        <CDropdownItem href="#">
+        <CDropdownItem href="#/Job/Assign">
           <CIcon icon={cilTask} className="me-2" />
           Tasks
           <CBadge color="danger" className="ms-2">
-            42
+            {countTask}
           </CBadge>
         </CDropdownItem>
         {/* <CDropdownItem href="#">
@@ -144,11 +191,11 @@ const AppHeaderDropdown = () => {
           </CBadge>
         </CDropdownItem> */}
         <CDropdownHeader className="bg-body-secondary fw-semibold my-2">Settings</CDropdownHeader>
-        <CDropdownItem href="#">
+        <CDropdownItem href="#/People/Profile">
           <CIcon icon={cilUser} className="me-2" />
           Profile
         </CDropdownItem>
-        <CDropdownItem href="#">
+        <CDropdownItem href="#/People/ChangePassword">
           <CIcon icon={cilSettings} className="me-2" />
           Change Password
         </CDropdownItem>

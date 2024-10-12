@@ -28,6 +28,9 @@ import {
 import { updateData, createData, deleteData, getData } from '../../../api'
 import Highlighter from 'react-highlight-words'
 import DynamicFormModal from './ModalForm'
+import dayjs from 'dayjs'
+const dateFormat = 'YYYY/MM/DD'
+const timeFormat = 'YYYY/MM/DD hh:mm:ss'
 
 const { Step } = Steps
 const { TextArea } = Input
@@ -335,7 +338,7 @@ const ServiceTable = () => {
       dataIndex: 'name',
       key: 'name',
       ...getColumnSearchProps('name'),
-      width: 300,
+      width: 200,
       sorter: (a, b) => a.name.localeCompare(b.name),
       ellipsis: true,
     },
@@ -354,6 +357,17 @@ const ServiceTable = () => {
       width: 400,
       dataIndex: 'description',
       key: 'description',
+      ellipsis: true,
+    },
+    {
+      title: 'Create Date',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      width: 180,
+      render: (date) =>
+        dayjs(date).format(timeFormat),
+      sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
+      defaultSortOrder: 'descend',
       ellipsis: true,
     },
     {

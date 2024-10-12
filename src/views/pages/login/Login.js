@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { login } from '../../../authApi'
 import { toast } from 'react-hot-toast'
+import { useSelector, useDispatch } from 'react-redux'
 import {
   CButton,
   CCard,
@@ -23,6 +24,7 @@ import { cilLockLocked, cilUser } from '@coreui/icons'
 
 const Login = () => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   // State for form inputs
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -40,13 +42,8 @@ const Login = () => {
     try {
       // Call the login API function from api.js
       const data = await login(username, password).then((res) => {
-        localStorage.setItem('CRM-id', res.user.id)
-        localStorage.setItem('CRM-name', res.user.name)
-        localStorage.setItem('CRM-email', res.user.email)
-        localStorage.setItem('CRM-username', res.user.username)
-        localStorage.setItem('CRM-role', res.user.role)
-        localStorage.setItem('CRM-verification', res.user.verification)
         localStorage.setItem('CRM-token', res.token)
+        dispatch({ type: 'set', user: res.user })
         // if (!res.user.verification) {
         //   navigate('/verification')
         // }
@@ -100,7 +97,7 @@ const Login = () => {
                           Login
                         </CButton>
                       </CCol>
-                      <CCol xs={7}>
+                      {/* <CCol xs={7}>
                         <Link to="/register">
                           <CButton color="primary" className="px-4" tabIndex={-1}>
                             Register as customer
@@ -111,7 +108,7 @@ const Login = () => {
                         <CButton color="link" className="px-0">
                           Forgot password?
                         </CButton>
-                      </CCol>
+                      </CCol> */}
                     </CRow>
                   </CForm>
                 </CCardBody>

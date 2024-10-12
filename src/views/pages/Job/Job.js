@@ -16,6 +16,7 @@ import {
   Radio,
   Space,
   Card,
+  Tree,
   Tag,
 } from 'antd'
 import { useNavigate } from 'react-router-dom'
@@ -24,15 +25,18 @@ import {
   CloseOutlined,
   DeleteOutlined,
   EditOutlined,
+  TeamOutlined,
   FolderViewOutlined,
   FileAddOutlined,
   UserAddOutlined,
+  DownOutlined,
 } from '@ant-design/icons'
 import { updateData, createData, deleteData, getData } from '../../../api'
 import Highlighter from 'react-highlight-words'
 import DynamicFormModal from './ModalForm'
 import AssignFormModal from './ModalAssign'
 import dayjs from 'dayjs'
+import { useSelector, useDispatch } from 'react-redux'
 const dateFormat = 'YYYY/MM/DD'
 const timeFormat = 'YYYY/MM/DD hh:mm:ss'
 
@@ -52,18 +56,21 @@ const ServiceTable = () => {
   const [serviceName, setServiceName] = useState('')
   const [isViewModalVisible, setIsViewModalVisible] = useState(false)
   const [isAssignModalVisible, setIsAssignModalVisible] = useState(false)
+  const [isAssignListModalVisible, setIsAssignListModalVisible] = useState(false)
   // const [currentService, setCurrentService] = useState(null)
   const [currentForm, setCurrentForm] = useState(null)
   const [currentJob, setCurrentJob] = useState(null)
   const [form] = Form.useForm()
+  const [assignList, setAssignList] = useState(null)
   const [formAssign] = Form.useForm()
   const [currentStep, setCurrentStep] = useState(0)
   // const [step1Values, setStep1Values] = useState({})
   const [formDataArray, setFormDataArray] = useState([]) // Default one field
   const navigate = useNavigate()
 
-  const role = localStorage.getItem('CRM-role')
-  const userId = localStorage.getItem('CRM-id')
+  const user = useSelector((state) => state.user)
+  const role = user ? user.role : ''
+  const userId = user ? user.id : 0
 
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
@@ -130,7 +137,7 @@ const ServiceTable = () => {
     // }
     let maxBudget = CJob.currentbudget ? CJob.currentbudget : 0
     if (role == 'employee') {
-      let eid = localStorage.getItem('CRM-id')
+      let eid = userId
       let selfAssign = assignmentData.find((r) => r.eid == eid && r.jid == CJob.id)
       maxBudget = selfAssign ? selfAssign.payment.currentbudget : 0
     }
@@ -270,7 +277,7 @@ const ServiceTable = () => {
 
   useEffect(() => {
     loadJobs()
-  }, [])
+  }, [user])
 
   const handleError = (error) => {
     message.error(error.response.data.message || error.message)
@@ -279,6 +286,41 @@ const ServiceTable = () => {
     } else if (error.status === 500) {
       navigate('/500')
     }
+  }
+
+  const handleCloseAssignListModal = async () => {
+    setIsAssignListModalVisible(false)
+  }
+
+  const showAssignListModal = async (record) => {
+    let assignParent = assignmentData.filter(r => r.jid == record.id && !r.assignby)
+    let assignChild = assignmentData.filter(r => r.jid == record.id && r.assignby)
+    let treeData = []
+    assignParent.forEach(r => {
+      let assignData = {
+        title: `Employee : ${employeeData.find(e => e.value == r.eid).label}
+                Budget : ${r.payment.budget}$
+                Status : ${r.status}
+        `,
+        key: r.id
+      }
+      let childList = assignChild.filter(a => a.assignby == r.eid)
+      if (childList.length) {
+        assignData.children = []
+        childList.forEach(re => {
+          assignData.children.push({
+            title: `Employee : ${employeeData.find(e => e.value == re.eid).label}
+                    Budget : ${re.payment.budget}$
+                    Status : ${r.status}
+            `,
+            key: re.id
+          })
+        })
+      }
+      treeData.push(assignData)
+    })
+    setAssignList(treeData)
+    setIsAssignListModalVisible(true)
   }
 
   const loadJobs = async () => {
@@ -511,6 +553,7 @@ const ServiceTable = () => {
       width: 170,
       render: (date) => dayjs(date).format(timeFormat),
       sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
+      defaultSortOrder: 'descend',
       ellipsis: true,
     },
     // {
@@ -536,6 +579,11 @@ const ServiceTable = () => {
           >
             <FolderViewOutlined style={{ fontSize: '20px' }} />
           </Button>
+          {assignmentData.find(r => r.jid == record.id) && (
+            <Button color="primary" size="large" variant="text" onClick={() => showAssignListModal(record)}>
+              <TeamOutlined style={{ fontSize: '20px' }} />
+            </Button>
+          )}
           {record.assigned && (
             <Button color="primary" size="large" variant="text" onClick={() => showModal(record)}>
               <EditOutlined style={{ fontSize: '20px' }} />
@@ -617,6 +665,31 @@ const ServiceTable = () => {
         employeeOptions={employeeData}
         onSubmit={handleSubmitAssignModal}
       />
+      <Modal
+        title={(
+          <div style={{ textAlign: 'center', width: '100%' }}>Assign list</div>
+        )}
+        open={isAssignListModalVisible}
+        style={{ top: 120, maxHeight: '85vh', overflowY: 'auto', overflowX: 'hidden' }}
+        width={400}
+        onCancel={handleCloseAssignListModal}
+        footer={null}
+      >
+        <Tree
+          showLine
+          switcherIcon={<DownOutlined />}
+          defaultExpandedKeys={['0']}
+          defaultExpandAll={true}
+          treeData={assignList}
+          titleRender={(item) => {
+            return <div
+              style={{whiteSpace: 'pre-line'}}
+              >
+              {item.title}
+              </div>
+          }}
+        />
+      </Modal>
       <Modal
         title={modalTitle}
         open={isModalVisible}

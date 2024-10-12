@@ -33,29 +33,6 @@ import { useNavigate } from 'react-router-dom'
 import { auth } from '../authApi'
 
 const AppHeader = () => {
-  const navigate = useNavigate()
-  useEffect(() => {
-    authenToken()
-  }, [])
-
-  const handleError = (error) => {
-    message.error(error.response.data.message || error.message)
-    if (error.status == 401) {
-      navigate('/login')
-    } else if (error.status == 404) {
-      navigate('/404')
-    } else if (error.status == 500) {
-      navigate('/500')
-    }
-  }
-
-  const authenToken = async () => {
-    try {
-      await auth()
-    } catch (error) {
-      handleError(error)
-    }
-  }
 
   const headerRef = useRef()
   const { colorMode, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')

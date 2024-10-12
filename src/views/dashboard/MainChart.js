@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react'
 import { CChartLine } from '@coreui/react-chartjs'
 import { getStyle } from '@coreui/utils'
 
-const MainChart = () => {
+const MainChart = (props) => {
   const chartRef = useRef(null)
 
   useEffect(() => {
@@ -34,49 +34,46 @@ const MainChart = () => {
         ref={chartRef}
         style={{ height: '300px', marginTop: '40px' }}
         data={{
-          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+          labels: [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December'
+          ],
           datasets: [
             {
-              label: 'My First dataset',
+              label: 'Income',
               backgroundColor: `rgba(${getStyle('--cui-info-rgb')}, .1)`,
               borderColor: getStyle('--cui-info'),
               pointHoverBackgroundColor: getStyle('--cui-info'),
               borderWidth: 2,
-              data: [
-                random(50, 200),
-                random(50, 200),
-                random(50, 200),
-                random(50, 200),
-                random(50, 200),
-                random(50, 200),
-                random(50, 200),
-              ],
+              data: props.dashboardData ? props.dashboardData.income.month : [],
               fill: true,
             },
             {
-              label: 'My Second dataset',
+              label: 'Salary',
               backgroundColor: 'transparent',
               borderColor: getStyle('--cui-success'),
               pointHoverBackgroundColor: getStyle('--cui-success'),
               borderWidth: 2,
-              data: [
-                random(50, 200),
-                random(50, 200),
-                random(50, 200),
-                random(50, 200),
-                random(50, 200),
-                random(50, 200),
-                random(50, 200),
-              ],
+              data: props.dashboardData ? props.dashboardData.salary.month : [],
             },
             {
-              label: 'My Third dataset',
+              label: 'Profit',
               backgroundColor: 'transparent',
-              borderColor: getStyle('--cui-danger'),
-              pointHoverBackgroundColor: getStyle('--cui-danger'),
+              borderColor: getStyle('--cui-success'),
+              pointHoverBackgroundColor: getStyle('--cui-success'),
               borderWidth: 1,
               borderDash: [8, 5],
-              data: [65, 65, 65, 65, 65, 65, 65],
+              data: props.dashboardData ? props.dashboardData.profit.month : [],
             },
           ],
         }}
@@ -84,7 +81,7 @@ const MainChart = () => {
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              display: false,
+              display: true,
             },
           },
           scales: {
@@ -105,7 +102,6 @@ const MainChart = () => {
               grid: {
                 color: getStyle('--cui-border-color-translucent'),
               },
-              max: 250,
               ticks: {
                 color: getStyle('--cui-body-color'),
                 maxTicksLimit: 5,

@@ -204,6 +204,7 @@ const OwnerTable = () => {
       ...getColumnSearchProps('name'),
       width: 250,
       sorter: (a, b) => a.name.localeCompare(b.name),
+      defaultSortOrder: 'ascend',
       ellipsis: true,
     },
     {
