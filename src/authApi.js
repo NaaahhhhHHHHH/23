@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Base URL configuration (optional, if your API URL is different from your frontend)
 //process.env.REACT_APP_API_BASE_URL || '' // Use .env file to manage base URLs
-const BASE_URL = 'http://localhost:5000/api'
+const BASE_URL = 'https://crmapi.allinclicks.net/api'
 
 const getAuthToken = () => {
   return localStorage.getItem('CRM-token')
