@@ -1,7 +1,8 @@
 // src/api.js
 import axios from 'axios'
 
-const BASE_URL = 'https://crmapi.allinclicks.net/api'
+const apiUrl = import.meta.env.VITE_API_URL
+const BASE_URL = `${apiUrl}/api`
 
 const getAuthToken = () => {
   return localStorage.getItem('CRM-token')

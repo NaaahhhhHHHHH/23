@@ -44,12 +44,23 @@ const WidgetsDropdown = (props) => {
           color="primary"
           value={
             <>
-              {props.dashboardData ? props.dashboardData.user.total.toFixed(2) : 0}{' '}
+              {props.dashboardData ? props.dashboardData.user.total : 0}{' '}
               <span className="fs-6 fw-normal">
-                ({props.dashboardData && props.dashboardData.user.percent != 'last0' ? 
-                (props.dashboardData.user.percent * 100).toFixed(2) : 0}% 
-                <CIcon icon={props.dashboardData && (props.dashboardData.user.percent == 'last0' || 
-                  props.dashboardData.user.percent > 0) ? cilArrowTop: cilArrowBottom} />)
+                (
+                {props.dashboardData && props.dashboardData.user.percent != 'last0'
+                  ? (props.dashboardData.user.percent * 100).toFixed(2)
+                  : 0}
+                %
+                <CIcon
+                  icon={
+                    props.dashboardData &&
+                    (props.dashboardData.user.percent == 'last0' ||
+                      props.dashboardData.user.percent > 0)
+                      ? cilArrowTop
+                      : cilArrowBottom
+                  }
+                />
+                )
               </span>
             </>
           }
@@ -84,7 +95,7 @@ const WidgetsDropdown = (props) => {
                   'September',
                   'October',
                   'November',
-                  'December'
+                  'December',
                 ],
                 datasets: [
                   {
@@ -139,10 +150,21 @@ const WidgetsDropdown = (props) => {
             <>
               ${props.dashboardData ? props.dashboardData.income.total.toFixed(2) : 0}{' '}
               <span className="fs-6 fw-normal">
-                ({props.dashboardData && props.dashboardData.income.percent != 'last0' ? 
-                (props.dashboardData.income.percent * 100).toFixed(2) : 0}% 
-                <CIcon icon={props.dashboardData && (props.dashboardData.income.percent == 'last0' ||
-                  props.dashboardData.income.percent > 0) ? cilArrowTop: cilArrowBottom} />)
+                (
+                {props.dashboardData && props.dashboardData.income.percent != 'last0'
+                  ? (props.dashboardData.income.percent * 100).toFixed(2)
+                  : 0}
+                %
+                <CIcon
+                  icon={
+                    props.dashboardData &&
+                    (props.dashboardData.income.percent == 'last0' ||
+                      props.dashboardData.income.percent > 0)
+                      ? cilArrowTop
+                      : cilArrowBottom
+                  }
+                />
+                )
               </span>
             </>
           }
@@ -177,7 +199,7 @@ const WidgetsDropdown = (props) => {
                   'September',
                   'October',
                   'November',
-                  'December'
+                  'December',
                 ],
                 datasets: [
                   {
@@ -232,10 +254,21 @@ const WidgetsDropdown = (props) => {
             <>
               ${props.dashboardData ? props.dashboardData.salary.total.toFixed(2) : 0}{' '}
               <span className="fs-6 fw-normal">
-                ({props.dashboardData && props.dashboardData.salary.percent != 'last0' ? 
-                (props.dashboardData.salary.percent * 100).toFixed(2) : 0}% 
-                <CIcon icon={props.dashboardData && (props.dashboardData.salary.percent == 'last0' ||
-                  props.dashboardData.salary.percent > 0)  ? cilArrowTop : cilArrowBottom} />)
+                (
+                {props.dashboardData && props.dashboardData.salary.percent != 'last0'
+                  ? (props.dashboardData.salary.percent * 100).toFixed(2)
+                  : 0}
+                %
+                <CIcon
+                  icon={
+                    props.dashboardData &&
+                    (props.dashboardData.salary.percent == 'last0' ||
+                      props.dashboardData.salary.percent > 0)
+                      ? cilArrowTop
+                      : cilArrowBottom
+                  }
+                />
+                )
               </span>
             </>
           }
@@ -270,7 +303,7 @@ const WidgetsDropdown = (props) => {
                   'September',
                   'October',
                   'November',
-                  'December'
+                  'December',
                 ],
                 datasets: [
                   {
@@ -323,12 +356,23 @@ const WidgetsDropdown = (props) => {
           color="danger"
           value={
             <>
-              ${props.dashboardData ? (props.dashboardData.profit.total).toFixed(2) : 0}{' '}
+              ${props.dashboardData ? props.dashboardData.profit.total.toFixed(2) : 0}{' '}
               <span className="fs-6 fw-normal">
-                ({props.dashboardData && props.dashboardData.profit.percent != 'last0' ? 
-                (props.dashboardData.profit.percent * 100).toFixed(2) : 0}% 
-                <CIcon icon={props.dashboardData && (props.dashboardData.profit.percent == 'last0' 
-                  || props.dashboardData.profit.percent > 0)  ? cilArrowTop : cilArrowBottom} />)
+                (
+                {props.dashboardData && props.dashboardData.profit.percent != 'last0'
+                  ? (props.dashboardData.profit.percent * 100).toFixed(2)
+                  : 0}
+                %
+                <CIcon
+                  icon={
+                    props.dashboardData &&
+                    (props.dashboardData.profit.percent == 'last0' ||
+                      props.dashboardData.profit.percent > 0)
+                      ? cilArrowTop
+                      : cilArrowBottom
+                  }
+                />
+                )
               </span>
             </>
           }
@@ -363,7 +407,7 @@ const WidgetsDropdown = (props) => {
                   'September',
                   'October',
                   'November',
-                  'December'
+                  'December',
                 ],
                 datasets: [
                   {

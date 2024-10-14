@@ -280,7 +280,7 @@ const ServiceTable = () => {
   }, [user])
 
   const handleError = (error) => {
-    message.error(error.response.data.message || error.message)
+    message.error((error.response && error.response.data ? error.response.data.message: '') || error.message|| error.message)
     if (error.status == 401) {
       navigate('/login')
     } else if (error.status === 500) {
@@ -293,27 +293,27 @@ const ServiceTable = () => {
   }
 
   const showAssignListModal = async (record) => {
-    let assignParent = assignmentData.filter(r => r.jid == record.id && !r.assignby)
-    let assignChild = assignmentData.filter(r => r.jid == record.id && r.assignby)
+    let assignParent = assignmentData.filter((r) => r.jid == record.id && !r.assignby)
+    let assignChild = assignmentData.filter((r) => r.jid == record.id && r.assignby)
     let treeData = []
-    assignParent.forEach(r => {
+    assignParent.forEach((r) => {
       let assignData = {
-        title: `Employee : ${employeeData.find(e => e.value == r.eid).label}
+        title: `Employee : ${employeeData.find((e) => e.value == r.eid).label}
                 Budget : ${r.payment.budget}$
                 Status : ${r.status}
         `,
-        key: r.id
+        key: r.id,
       }
-      let childList = assignChild.filter(a => a.assignby == r.eid)
+      let childList = assignChild.filter((a) => a.assignby == r.eid)
       if (childList.length) {
         assignData.children = []
-        childList.forEach(re => {
+        childList.forEach((re) => {
           assignData.children.push({
-            title: `Employee : ${employeeData.find(e => e.value == re.eid).label}
+            title: `Employee : ${employeeData.find((e) => e.value == re.eid).label}
                     Budget : ${re.payment.budget}$
                     Status : ${r.status}
             `,
-            key: re.id
+            key: re.id,
           })
         })
       }
@@ -579,8 +579,13 @@ const ServiceTable = () => {
           >
             <FolderViewOutlined style={{ fontSize: '20px' }} />
           </Button>
-          {assignmentData.find(r => r.jid == record.id) && (
-            <Button color="primary" size="large" variant="text" onClick={() => showAssignListModal(record)}>
+          {assignmentData.find((r) => r.jid == record.id) && (
+            <Button
+              color="primary"
+              size="large"
+              variant="text"
+              onClick={() => showAssignListModal(record)}
+            >
               <TeamOutlined style={{ fontSize: '20px' }} />
             </Button>
           )}
@@ -666,9 +671,7 @@ const ServiceTable = () => {
         onSubmit={handleSubmitAssignModal}
       />
       <Modal
-        title={(
-          <div style={{ textAlign: 'center', width: '100%' }}>Assign list</div>
-        )}
+        title={<div style={{ textAlign: 'center', width: '100%' }}>Assign list</div>}
         open={isAssignListModalVisible}
         style={{ top: 120, maxHeight: '85vh', overflowY: 'auto', overflowX: 'hidden' }}
         width={400}
@@ -682,11 +685,7 @@ const ServiceTable = () => {
           defaultExpandAll={true}
           treeData={assignList}
           titleRender={(item) => {
-            return <div
-              style={{whiteSpace: 'pre-line'}}
-              >
-              {item.title}
-              </div>
+            return <div style={{ whiteSpace: 'pre-line' }}>{item.title}</div>
           }}
         />
       </Modal>

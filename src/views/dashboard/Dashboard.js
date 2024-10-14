@@ -168,7 +168,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <WidgetsDropdown className="mb-4" dashboardData={data}/>
+      <WidgetsDropdown className="mb-4" dashboardData={data} />
       <CCard className="mb-4">
         <CCardBody>
           <CRow>
@@ -197,7 +197,7 @@ const Dashboard = () => {
               </CButtonGroup>
             </CCol>
           </CRow>
-          <MainChart dashboardData={data}/>
+          <MainChart dashboardData={data} />
         </CCardBody>
         {/* <CCardFooter>
           <CRow

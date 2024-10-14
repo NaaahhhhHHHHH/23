@@ -54,13 +54,15 @@ const AppHeaderDropdown = () => {
     let countT = 0
     if (response5 && response5.data && response5.data.length && role && id) {
       if (role == 'owner') countT = response5.data.length
-      if (role == 'employee') countT = response5.data.filter(r => r.eid == id).length
+      if (role == 'employee') countT = response5.data.filter((r) => r.eid == id).length
     }
     setCountTask(countT)
   }
 
   const handleError = (error) => {
-    message.error(error.response.data.message || error.message)
+    message.error(
+      (error.response && error.response.data ? error.response.data.message : '') || error.message,
+    )
     if (error.status == 401) {
       navigate('/login')
     } else if (error.status == 404) {

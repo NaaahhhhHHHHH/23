@@ -289,7 +289,7 @@ const ServiceTable = () => {
   }, [user])
 
   const handleError = (error) => {
-    message.error(error.response.data.message || error.message)
+    message.error((error.response && error.response.data ? error.response.data.message: '') || error.message|| error.message)
     if (error.status == 401) {
       navigate('/login')
     } else if (error.status === 500) {
@@ -590,49 +590,53 @@ const ServiceTable = () => {
           <Button color="primary" size="large" variant="text" onClick={() => showViewModal(record)}>
             <FolderViewOutlined style={{ fontSize: '20px' }} />
           </Button>
-          { (role == 'owner' || record.assignby == userId) && (
-          <><Button
-              color="primary"
-              size="large"
-              variant="text"
-              onClick={() => showAssignModal(record)}
-            >
-              <EditOutlined style={{ fontSize: '20px' }} />
-            </Button>
-            <Button
-              size="large"
-              color="danger"
-              variant="text"
-              onClick={() => handleDelete(record.id)}
-            >
+          {(role == 'owner' || record.assignby == userId) && (
+            <>
+              <Button
+                color="primary"
+                size="large"
+                variant="text"
+                onClick={() => showAssignModal(record)}
+              >
+                <EditOutlined style={{ fontSize: '20px' }} />
+              </Button>
+              <Button
+                size="large"
+                color="danger"
+                variant="text"
+                onClick={() => handleDelete(record.id)}
+              >
                 <DeleteOutlined style={{ fontSize: '20px' }} />
-              </Button></>
+              </Button>
+            </>
           )}
-          { (role == 'employee' && record.eid == userId) && (
-            <><Button
-            color="primary"
-            size="medium"
-            variant="filled"
-            style={{ 
-              padding: '10px',
-              margin: '5px' 
-            }}
-            onClick={() => handleUpdateStatusAssign(record, 'Accepted')}
-          >
-            Accept
-          </Button>
-          <Button
-            size="medium"
-            color="danger"
-            variant="filled"
-            style={{ 
-              padding: '10px',
-              margin: '5px'
-            }}
-            onClick={() => handleDelete(record.id)}
-          >
-            Decline
-            </Button></>
+          {role == 'employee' && record.eid == userId && (
+            <>
+              <Button
+                color="primary"
+                size="medium"
+                variant="filled"
+                style={{
+                  padding: '10px',
+                  margin: '5px',
+                }}
+                onClick={() => handleUpdateStatusAssign(record, 'Accepted')}
+              >
+                Accept
+              </Button>
+              <Button
+                size="medium"
+                color="danger"
+                variant="filled"
+                style={{
+                  padding: '10px',
+                  margin: '5px',
+                }}
+                onClick={() => handleDelete(record.id)}
+              >
+                Decline
+              </Button>
+            </>
           )}
         </>
       ),

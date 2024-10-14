@@ -17,6 +17,7 @@ import {
   cilControl,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
+const apiUrl = import.meta.env.VITE_API_URL
 
 const _nav = [
   {
@@ -51,37 +52,37 @@ const _nav = [
       },
     ],
   },
-  
-      {
-        component: CNavItem,
-        icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-        name: 'Service',
-        to: '/Service/Service',
-      },
-      {
-        component: CNavItem,
-        icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
-        name: 'Form',
-        to: '/Service/Form',
-      },
 
-      {
-        component: CNavItem,
-        name: 'Job',
-        to: '/Job/Job',
-        icon: <CIcon icon={cilStar} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Assign',
-        to: '/Job/Assign',
-        icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
-      },
+  {
+    component: CNavItem,
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    name: 'Service',
+    to: '/Service/Service',
+  },
+  {
+    component: CNavItem,
+    icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
+    name: 'Form',
+    to: '/Service/Form',
+  },
+
+  {
+    component: CNavItem,
+    name: 'Job',
+    to: '/Job/Job',
+    icon: <CIcon icon={cilStar} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Assign',
+    to: '/Job/Assign',
+    icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+  },
 
   {
     component: CNavItem,
     name: 'Docs',
-    href: 'http://localhost:5000/api-docs/',
+    href: `${apiUrl}/api-docs/`,
     icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
   },
 ]

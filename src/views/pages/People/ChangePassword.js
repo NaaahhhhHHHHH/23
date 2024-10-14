@@ -29,13 +29,15 @@ const EmployeeTable = () => {
   const name = user && user.name ? user.name.split(' ')[0] : ''
   const role = user && user.role ? user.role : ''
   const id = user && user.id ? user.id : 0
-  
+
   useEffect(() => {
     loadProfile()
   }, [user])
 
   const handleError = (error) => {
-    message.error(error.response.data.message || error.message)
+    message.error(
+      (error.response && error.response.data ? error.response.data.message : '') || error.message,
+    )
     if (error.status == 401) {
       navigate('/login')
     } else if (error.status == 500) {
@@ -45,10 +47,10 @@ const EmployeeTable = () => {
 
   const handleUpdate = async (values) => {
     try {
-      let updateP = {... data}
+      let updateP = { ...data }
       updateP.password = values.password
       let res = await updateData(`${role}`, `${id}`, updateP)
-      let updateUser = {... user}
+      let updateUser = { ...user }
       updateUser.name = updateP.name
       dispatch({ type: 'set', user: updateUser })
       //loadProfile()
@@ -79,20 +81,20 @@ const EmployeeTable = () => {
 
   return (
     <>
-        <Form
-          form={form}
-          // layout="vertical"
-          onFinish={handleUpdate}
-          labelCol= {{
-            xs: { span: 24 },
-            sm: { span: 8 },
-          }}
-          wrapperCol= {{
-            xs: { span: 14 },
-            sm: { span: 10 },
-          }}
-        >
-          {/* <Form.Item
+      <Form
+        form={form}
+        // layout="vertical"
+        onFinish={handleUpdate}
+        labelCol={{
+          xs: { span: 24 },
+          sm: { span: 8 },
+        }}
+        wrapperCol={{
+          xs: { span: 14 },
+          sm: { span: 10 },
+        }}
+      >
+        {/* <Form.Item
             name="name"
             label="Name"
             rules={[{ required: true, message: 'Please input name!' }]}
@@ -141,38 +143,34 @@ const EmployeeTable = () => {
           >
             <Input />
           </Form.Item> */}
-          <Form.Item
-            name="password"
-            label='New Password'
-            rules={[{ required: true }]}
-          >
-            <Input.Password />
-          </Form.Item>
-          <Form.Item
-            name="Confirm Password"
-            label='Confirm Password'
-            rules={[
-              {
-                required: true,
+        <Form.Item name="password" label="New Password" rules={[{ required: true }]}>
+          <Input.Password />
+        </Form.Item>
+        <Form.Item
+          name="Confirm Password"
+          label="Confirm Password"
+          rules={[
+            {
+              required: true,
+            },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue('password') === value) {
+                  return Promise.resolve()
+                }
+                return Promise.reject(new Error('The new password that you entered do not match!'))
               },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue('password') === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(new Error('The new password that you entered do not match!'));
-                },
-              }),
-            ]}   
-          >
-            <Input.Password />
-          </Form.Item>
-          <Form.Item wrapperCol={{ xs: { span: 24, offset: 0 }, sm: { span: 16, offset: 8 } }}>
-            <Button type="primary" htmlType="submit">
-              {'Update'}
-            </Button>
-          </Form.Item>
-        </Form>
+            }),
+          ]}
+        >
+          <Input.Password />
+        </Form.Item>
+        <Form.Item wrapperCol={{ xs: { span: 24, offset: 0 }, sm: { span: 16, offset: 8 } }}>
+          <Button type="primary" htmlType="submit">
+            {'Update'}
+          </Button>
+        </Form.Item>
+      </Form>
     </>
   )
 }

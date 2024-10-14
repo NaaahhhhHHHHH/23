@@ -177,7 +177,7 @@ const ServiceTable = () => {
   }, [])
 
   const handleError = (error) => {
-    message.error(error.response.data.message || error.message)
+    message.error((error.response && error.response.data ? error.response.data.message: '') || error.message|| error.message)
     if (error.status == 401) {
       navigate('/login')
     } else if (error.status === 500) {
@@ -347,8 +347,7 @@ const ServiceTable = () => {
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 250,
-      render: (date) =>
-        dayjs(date).format(timeFormat),
+      render: (date) => dayjs(date).format(timeFormat),
       sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
       defaultSortOrder: 'descend',
       ellipsis: true,

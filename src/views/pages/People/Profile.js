@@ -35,7 +35,7 @@ const EmployeeTable = () => {
   }, [user])
 
   const handleError = (error) => {
-    message.error(error.response.data.message || error.message)
+    message.error((error.response && error.response.data ? error.response.data.message: '') || error.message|| error.message)
     if (error.status == 401) {
       navigate('/login')
     } else if (error.status == 500) {

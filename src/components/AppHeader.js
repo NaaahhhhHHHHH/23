@@ -33,7 +33,6 @@ import { useNavigate } from 'react-router-dom'
 import { auth } from '../authApi'
 
 const AppHeader = () => {
-
   const headerRef = useRef()
   const { colorMode, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
 
