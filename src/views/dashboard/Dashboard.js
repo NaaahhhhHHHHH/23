@@ -54,13 +54,25 @@ import WidgetsBrand from '../widgets/WidgetsBrand'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
 import MainChart from './MainChart'
 import { useEffect, useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { updateData, createData, deleteData, getData } from '../../api'
+import { message } from 'antd'
 
 const Dashboard = () => {
   const [data, setData] = useState(null)
   const yearNum = new Date().getFullYear()
   let listYear = [yearNum - 2, yearNum - 1, yearNum]
   const [yearSelect, setYearSelect] = useState(new Date().getFullYear())
+  const navigate = useNavigate()
+
+  const handleError = (error) => {
+    message.error((error.response && error.response.data ? error.response.data.message: '') || error.message|| error.message)
+    if (error.status == 401) {
+      navigate('/login')
+    } else if (error.status === 500) {
+      navigate('/500')
+    }
+  }
 
   const loadData = async () => {
     try {

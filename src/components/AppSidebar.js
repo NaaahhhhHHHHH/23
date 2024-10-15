@@ -23,6 +23,12 @@ const AppSidebar = () => {
   const dispatch = useDispatch()
   const unfoldable = useSelector((state) => state.sidebarUnfoldable)
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  const user = useSelector((state) => state.user)
+  const role = user ? user.role : ''
+  const userId = user ? user.id : 0
+  if (role == 'employee' && navigation[1] && navigation[1].items && navigation[1].items[1]) {
+    navigation[1].items.splice(1, 1)
+  }
 
   return (
     <CSidebar

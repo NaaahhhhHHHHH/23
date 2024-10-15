@@ -299,12 +299,14 @@ const ServiceTable = () => {
 
   const loadAssign = async () => {
     try {
-      const response0 = await getData('job')
-      const response1 = await getData('service')
-      const response2 = await getData('form')
-      // const response3 = await getData('customer')
-      const response4 = await getData('employee')
-      const response5 = await getData('assignment')
+      
+      const [response0, response1, response2, response4, response5] = await Promise.all([
+        getData('job'),
+        getData('service'),
+        getData('form'),
+        getData('employee'),
+        getData('assignment')
+      ]);
 
       let jobList = response0.data
       let formList = response2.data

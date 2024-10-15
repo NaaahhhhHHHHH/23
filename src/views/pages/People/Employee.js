@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Table, Space, Input, Button, Modal, Form, message, Row, Col, Checkbox, Radio } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { updateData, createData, deleteData, getData } from '../../../api'
+import { useSelector, useDispatch } from 'react-redux'
 import {
   SearchOutlined,
   CheckOutlined,
@@ -9,6 +10,7 @@ import {
   EditOutlined,
   CloseOutlined,
   FileAddOutlined,
+  EyeOutlined,
 } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
 
@@ -22,6 +24,10 @@ const EmployeeTable = () => {
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
   const searchInput = useRef(null)
+
+  const user = useSelector((state) => state.user)
+  const role = user ? user.role : ''
+  const userId = user ? user.id : 0
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm()
@@ -237,6 +243,8 @@ const EmployeeTable = () => {
       align: 'center',
       render: (text, record) => (
         <>
+           { role == 'owner' && (
+            <>
           <Button color="primary" size="large" variant="text" onClick={() => showModal(record)}>
             <EditOutlined style={{ fontSize: '20px' }} />
           </Button>
@@ -249,6 +257,15 @@ const EmployeeTable = () => {
           >
             <DeleteOutlined style={{ fontSize: '20px' }} />
           </Button>
+          </>
+           )}
+            { role == 'employee' && (
+            <>
+          <Button color="primary" size="large" variant="text" onClick={() => showModal(record)}>
+            <EyeOutlined style={{ fontSize: '20px' }} />
+          </Button>
+          </>
+           )}
         </>
       ),
     },
@@ -263,6 +280,7 @@ const EmployeeTable = () => {
 
   return (
     <>
+      { role == 'owner' && (
       <Row style={{ display: 'block', marginBottom: 5, textAlign: 'right' }}>
         {/* <Col span={12}>
           <Input.Search
@@ -278,6 +296,7 @@ const EmployeeTable = () => {
           </Button>
         </Col>
       </Row>
+      )}
       <Table
         columns={columns}
         dataSource={data}
@@ -303,7 +322,7 @@ const EmployeeTable = () => {
             label="Name"
             rules={[{ required: true, message: 'Please input name!' }]}
           >
-            <Input />
+            <Input readOnly={role == 'employee'}/>
           </Form.Item>
           <Form.Item
             name="username"
@@ -320,7 +339,7 @@ const EmployeeTable = () => {
               { type: 'email', message: 'Please input valid email!' },
             ]}
           >
-            <Input />
+            <Input readOnly={role == 'employee'}/>
           </Form.Item>
           <Form.Item
             name="mobile"
@@ -333,7 +352,7 @@ const EmployeeTable = () => {
               },
             ]}
           >
-            <Input />
+            <Input readOnly={role == 'employee'}/>
           </Form.Item>
           <Form.Item
             name="work"
@@ -345,8 +364,10 @@ const EmployeeTable = () => {
               },
             ]}
           >
-            <Input />
+            <Input readOnly={role == 'employee'}/>
           </Form.Item>
+          { role == 'owner' && (
+          <>
           <Form.Item
             name="password"
             label={currentEmployee ? 'New Password' : 'Password'}
@@ -359,6 +380,8 @@ const EmployeeTable = () => {
               {currentEmployee ? 'Update' : 'Add'}
             </Button>
           </div>
+          </>
+          )}
         </Form>
       </Modal>
     </>
